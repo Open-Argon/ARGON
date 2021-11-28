@@ -2,8 +2,11 @@ import re
 from typing import Tuple
 import sys
 import time
+import math
 
 # make a function that takes in a param of any type and returns it as a number
+
+version = "ARGON B1.0"
 
 
 def number(value):
@@ -24,6 +27,20 @@ def log(*args):
     print(*newargs)
 
 
+def boxify(text, length=0, align="left"):
+    if align not in ['left', 'right', 'center']:
+        raise SyntaxError(f"invalid alignment")
+    textsplit = text.split("\n")
+    for i in range(len(textsplit)):
+        if len(textsplit[i]) > length:
+            length = len(textsplit[i])
+    processed = []
+    for i in range(len(textsplit)):
+        processed.append('║ ' + (" "*(length-len(textsplit[i]) if align == 'right' else math.floor((length-len(textsplit[i]))/2) if align == 'center' else 0)) +
+                         textsplit[i] + (" "*(length-len(textsplit[i]) if align == 'right' else math.ceil((length-len(textsplit[i]))/2) if align == 'center' else 0)) + ' ║')
+    return ('╔'+((length+2)*'═')+'╗\n'+("\n".join(processed))+'\n╚'+((length+2)*'═')+'╝')
+
+
 def valToArgonString(value):
     if type(value) == int or type(value) == float:
         return str(value)
@@ -37,7 +54,7 @@ def valToArgonString(value):
 
 
 vars = {'log': {'type': 'init', 'py': log}, 'input': {'type': 'init', 'py': input}, 'PYeval': {'type': 'init', 'py': eval}, 'PYexec': {'type': 'init', 'py': exec}, 'abs': {'type': 'init', 'py': abs}, 'round': {'type': 'init', 'py': round}, 'length': {'type': 'init', 'py': len}, 'number': {'type': 'init',
-                                                                                                                                                                                                                                                                                                  'py': number}, 'string': {'type': 'init', 'py': str}, 'bool': {'type': 'init', 'py': bool}, 'yes': {'type': 'init', 'value': True}, 'no': {'type': 'init', 'value': False}, 'unknown': {'type': 'init', 'value': None}, 'snooze': {'type': 'init', 'py': time.sleep}, 'time': {'type': 'init', 'py': time.time}}
+                                                                                                                                                                                                                                                                                                  'py': number}, 'string': {'type': 'init', 'py': str}, 'bool': {'type': 'init', 'py': bool}, 'yes': {'type': 'init', 'value': True}, 'no': {'type': 'init', 'value': False}, 'unknown': {'type': 'init', 'value': None}, 'snooze': {'type': 'init', 'py': time.sleep}, 'time': {'type': 'init', 'py': time.time}, 'exit': {'type': 'init', 'py': sys.exit}, 'boxify': {'type': 'init', 'py': boxify}}
 
 stringTextREGEX = r"( *)((((\')((\\([a-z]|\\|\"))|[^\\])*(\'))|((\")((\\([a-z]|\\|\"))|[^\\])*(\"))))( *)"
 numberTextREGEX = r"( *)([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
@@ -348,12 +365,12 @@ if __name__ == "__main__":
         code = open(sys.argv[1], "r").read().split("\n")
         run(code)
     else:
-        code = input("> ")
-        while code != "exit":
+        print(boxify(version+'\nMIT LICENCE (open source)',  align='center'))
+        while True:
             try:
+                code = input(">>> ")
                 output = (Aexec(code))
                 if output[0]:
                     log(output[1])
             except Exception as e:
                 print(e)
-            code = input("> ")

@@ -1,0 +1,1 @@
+pyinstaller --icon="logo.ico" -i"logo.ico" -F Argon.py
