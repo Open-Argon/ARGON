@@ -37,7 +37,7 @@ def boxify(text, length=0, align="left"):
     processed = []
     for i in range(len(textsplit)):
         processed.append('║ ' + (" "*(length-len(textsplit[i]) if align == 'right' else math.floor((length-len(textsplit[i]))/2) if align == 'center' else 0)) +
-                         textsplit[i] + (" "*(length-len(textsplit[i]) if align == 'right' else math.ceil((length-len(textsplit[i]))/2) if align == 'center' else 0)) + ' ║')
+                         textsplit[i] + (" "*(length-len(textsplit[i]) if align == 'left' else math.ceil((length-len(textsplit[i]))/2) if align == 'center' else 0)) + ' ║')
     return ('╔'+((length+2)*'═')+'╗\n'+("\n".join(processed))+'\n╚'+((length+2)*'═')+'╝')
 
 

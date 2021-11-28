@@ -1,1 +1,2 @@
 log(boxify('hello world\nhello worlddddd', 0, 'center'))
+log(boxify('hello world\nhello worlddddd', 0, 'right'))
