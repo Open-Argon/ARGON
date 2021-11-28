@@ -1,0 +1,7 @@
+const start = time()
+i = 0
+while ((i)<(10000)) [
+    log(i)
+    i = (i) + (1)
+]
+log((time()) - (start))
