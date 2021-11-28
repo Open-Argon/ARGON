@@ -365,7 +365,8 @@ if __name__ == "__main__":
         code = open(sys.argv[1], "r").read().split("\n")
         run(code)
     else:
-        print(boxify(version+'\nMIT LICENCE (open source)',  align='center'))
+        print(boxify(
+            version+'\nMIT LICENCE (https://github.com/Ugric/Argon)',  align='center'))
         while True:
             try:
                 code = input(">>> ")
