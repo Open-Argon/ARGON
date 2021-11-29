@@ -1,2 +1,3 @@
-log(boxify('hello world\nhello worlddddd', 0, 'center'))
-log(boxify('hello world\nhello worlddddd', 0, 'right'))
+while (yes) [
+    log((1) + (1))
+]

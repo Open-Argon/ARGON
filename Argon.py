@@ -36,8 +36,8 @@ def boxify(text, length=0, align="left"):
             length = len(textsplit[i])
     processed = []
     for i in range(len(textsplit)):
-        processed.append('║ ' + (" "*(length-len(textsplit[i]) if align == 'right' else math.floor((length-len(textsplit[i]))/2) if align == 'center' else 0)) +
-                         textsplit[i] + (" "*(length-len(textsplit[i]) if align == 'left' else math.ceil((length-len(textsplit[i]))/2) if align == 'center' else 0)) + ' ║')
+        processed.append('║ ' + (" "*(length-len(textsplit[i]) if align == 'right' else math.ceil((length-len(textsplit[i]))/2) if align == 'center' else 0)) +
+                         textsplit[i] + (" "*(length-len(textsplit[i]) if align == 'left' else math.floor((length-len(textsplit[i]))/2) if align == 'center' else 0)) + ' ║')
     return ('╔'+((length+2)*'═')+'╗\n'+("\n".join(processed))+'\n╚'+((length+2)*'═')+'╝')
 
 
@@ -61,17 +61,18 @@ numberTextREGEX = r"( *)([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
 varTextREGEX = r"( *)([a-z]|[A-Z])([a-zA-Z0-9]*)( *)"
 bracketsTextREGEX = r"\(.*\)"
 functionTextREGEX = r"( *)(([a-z]|[A-Z])([a-zA-Z0-9]*))\(.*\)( *)"
-cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}|bracketsTextREGEX"
+cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}"
 cobinedcompiled = re.compile(cobined)
 bracketsTest = re.compile(bracketsTextREGEX)
 stringTest = re.compile(stringTextREGEX)
 functionTest = re.compile(functionTextREGEX)
 numberTest = re.compile(numberTextREGEX)
-setVarREGEX = fr"( *)(((const|var) ({varTextREGEX})(( *)=( *).+)?)|(([a-z]|[A-Z])+)(( *)(\+|\-|\*|\/)?=( *).+))( *)"
+setVarREGEX = fr"( *)(((const|var) ({varTextREGEX})(( +)=( +).+)?)|(([a-z]|[A-Z])+)(( +)=( +).+))( *)"
 setVar = re.compile(
     setVarREGEX
 )
-cobinedevalcompiled = re.compile(fr"{cobined}|{setVar}")
+cobinedevalcompiled = re.compile(fr"{cobined}|{setVarREGEX}")
+evalcompiled = re.compile(r"( *)( *)")
 varTest = re.compile(varTextREGEX)
 
 # make a function that takes an input of a string that represents a string and convert all the \ commands to their actual character
@@ -104,29 +105,29 @@ def math_exec(operator, value1, value2):
         return value1 / value2
     elif operator == "%":
         return value1 % value2
-    elif operator == "**":
+    elif operator == "^":
         return value1 ** value2
-    elif operator == "//":
+    elif operator == "$":
         return value1 // value2
     elif operator == "==":
         return value1 == value2
     elif operator == "!=":
         return value1 != value2
-    elif operator == ">":
+    elif operator == ">-":
         return value1 > value2
-    elif operator == "<":
+    elif operator == "<-":
         return value1 < value2
     elif operator == ">=":
         return value1 >= value2
     elif operator == "<=":
         return value1 <= value2
-    elif operator == "in":
+    elif operator == " in ":
         return value1 in value2
-    elif operator == "not in":
+    elif operator == " not in ":
         return value1 not in value2
-    elif operator == "or":
+    elif operator == " or ":
         return value1 or value2
-    elif operator == "and":
+    elif operator == " and ":
         return value1 and value2
     else:
         raise SyntaxError(f"invalid syntax")
@@ -198,10 +199,7 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]:
         output = convert_backslash(string)
     elif numberTest.fullmatch(string):
         didprocess = True
-        try:
-            output = int(string)
-        except:
-            output = float(string)
+        output = number(string)
     elif varTest.fullmatch(string):
         didprocess = True
         var = string.strip()
@@ -247,48 +245,47 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]:
 # bodmas stands for brackets, order of operations, division, multiplication, addition, subtraction
 def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]:
     string = string.strip()
-    brackets = 0
-    if not (string.startswith("(") and string.endswith(")")):
+    if (eval and cobinedcompiled.fullmatch(string)) or (not eval and cobinedevalcompiled.fullmatch(string)):
         return val_Aexec(string, eval, vars=vars)
+    elif bracketsTest.fullmatch(string) and string.startswith("(") and string.endswith(")"):
+        return Aexec(string[1:-1], eval, vars=vars)
     else:
-        loopoutput = []
+      processes = [" and ", " or ", " not in ", " in ", "<=", ">=", "<-", ">-", "!=", "==", "-", "+", "^","*","$","/"]
+      loopoutput = []
+      process = []
+      didprocess = False
+      for i in range(len(string)):
+        process.append(string[i])
+        for x in range(len(processes)):
+          joined = ''.join(process)
+          if joined.endswith(processes[x]):
+            removed = joined[:-len(processes[x])].strip()
+            if cobinedevalcompiled.fullmatch(removed):
+                loopoutput.append(removed)
+                loopoutput.append(processes[x])
+                process = []
+            elif removed.startswith("(") and removed.endswith(")") and cobinedevalcompiled.fullmatch(removed[1:-1]):
+                loopoutput.append(removed)
+                loopoutput.append(processes[x])
+                process = []
+      if len(process)> 0:
+        loopoutput.append("".join(process))
         process = []
-        for i in range(len(string)):
-            if string[i] == "(":
-                brackets += 1
-                if brackets > 1:
-                    process.append(string[i])
-                elif len(process) > 0:
-                    loopoutput.append("".join(process).strip())
-                    process = []
-            elif string[i] == ")":
-                brackets -= 1
-                if brackets > 0:
-                    process.append(string[i])
-                elif brackets == 0:
-                    didprocess, val = Aexec("".join(process), True, vars=vars)
-                    if didprocess:
-                        loopoutput.append(val)
-                    else:
-                        raise Exception(f"Error in brackets: {val}")
-                    process = []
-                elif brackets < 0:
-                    raise SyntaxError(f"invalid syntax")
-            elif brackets == 0:
-                process.append(string[i])
-            else:
-                process.append(string[i])
-        if brackets != 0:
-            raise SyntaxError(f"invalid syntax")
-        if len(process) > 0:
-            loopoutput.append("".join(process).strip())
-            process = []
-        finaloutput = loopoutput[0]
-        for i in range(0, int(len(loopoutput) / 2)):
-            i = i * 2 + 2
-            finaloutput = math_exec(
-                loopoutput[i - 1], finaloutput, loopoutput[i])
-        return True, finaloutput
+      didprocess = False
+      output = None
+      for x in range(len(processes)):
+        breaks = False
+        for i in range(1,len(loopoutput),2):
+          if processes[x] == loopoutput[i]:
+            output = (math_exec(loopoutput[i], Aexec(''.join(loopoutput[:i]))[1],  Aexec(''.join(loopoutput[i+1:]))[1]))
+            didprocess = True
+            breaks = True
+            break
+        if breaks:
+          break
+      if not didprocess:
+          raise SyntaxError(f"invalid syntax")
+      return didprocess, output
 
 
 runnerREGEX = re.compile(
@@ -366,12 +363,13 @@ if __name__ == "__main__":
         run(code)
     else:
         print(boxify(
-            version+'\nMIT LICENCE (https://github.com/Ugric/Argon)',  align='center'))
+            version+'\nMIT LICENCE AGREEMENT\n(https://github.com/Ugric/Argon)',  align='center'))
         while True:
             try:
                 code = input(">>> ")
-                output = (Aexec(code))
-                if output[0]:
-                    log(output[1])
+                if code != "":
+                    output = (Aexec(code))
+                    if output[0]:
+                        log(output[1])
             except Exception as e:
                 print(e)
