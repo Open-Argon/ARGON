@@ -7,7 +7,7 @@ import random
 
 # make a function that takes in a param of any type and returns it as a number
 
-version = "ARGON Beta 2.0.0"
+version = "ARGON Beta 2.1.0"
 
 
 def number(value):
