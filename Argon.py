@@ -3,6 +3,7 @@ from typing import Tuple
 import sys
 import time
 import math
+import random
 
 # make a function that takes in a param of any type and returns it as a number
 
@@ -48,38 +49,58 @@ def boxify(text, length=0, align="left"):
     return ('╔'+((length+2)*'═')+'╗\n'+("\n".join(processed))+'\n╚'+((length+2)*'═')+'╝')
 
 
-def valToArgonString(value, format = True, speach = False):
+def valToArgonString(value, speach = False):
     if type(value) == int or type(value) == float:
-        return '{:,}'.format(number(value))
+        return str(value)
     elif value == None:
         return "unknown"
     elif value == True:
         return "yes"
     elif value == False:
         return "no"
+    elif type(value) == dict:
+        return "{" + ", ".join(f"{valToArgonString(key, speach=True)}: {valToArgonString(value[key], speach=True)}" for key in value) + "}"
+    elif type(value) in [list, tuple]:
+        return "[" + ", ".join(valToArgonString(i, speach=True) for i in value) + "]"
     elif speach == True and type(value) == str:
       return f'"{value}"'
     return value
 
-vars = {'log': {'type': 'init', 'py': log}, 'input': {'type': 'init', 'py': input}, 'PYeval': {'type': 'init', 'py': eval}, 'PYexec': {'type': 'init', 'py': exec}, 'abs': {'type': 'init', 'py': abs}, 'round': {'type': 'init', 'py': round}, 'length': {'type': 'init', 'py': len}, 'number': {'type': 'init', 'py': number}, 'string': {'type': 'init', 'py': str}, 'bool': {'type': 'init', 'py': bool}, 'yes': {'type': 'init', 'value': True}, 'no': {'type': 'init', 'value': False}, 'unknown': {'type': 'init', 'value': None}, 'snooze': {'type': 'init', 'py': time.sleep}, 'time': {'type': 'init', 'py': time.time}, 'exit': {'type': 'init', 'py': sys.exit}, 'boxify': {'type': 'init', 'py': boxify}, 'whole': {'type':'init', 'py': int}, 'exec': {"type": "init", "py": code_Aexec}, 'eval': {"type": "init", "py": code_Aeval}}
+def Arange(start, stop=None, step=1):
+    if stop == None:
+        stop = start
+        start = 0
+    if step == 0:
+        raise ValueError("step cannot be 0")
+    if step > 0:
+        return list(range(start, stop + 1, step))
+    else:
+        return list(range(start, stop - 1, step))
+
+vars = {'log': {'type': 'init', 'py': log}, 'input': {'type': 'init', 'py': input}, 'PYeval': {'type': 'init', 'py': eval}, 'PYexec': {'type': 'init', 'py': exec}, 'abs': {'type': 'init', 'py': abs}, 'round': {'type': 'init', 'py': round}, 'length': {'type': 'init', 'py': len}, 'number': {'type': 'init', 'py': number}, 'string': {'type': 'init', 'py': str}, 'bool': {'type': 'init', 'py': bool}, 'yes': {'type': 'init', 'value': True}, 'no': {'type': 'init', 'value': False}, 'unknown': {'type': 'init', 'value': None}, 'snooze': {'type': 'init', 'py': time.sleep}, 'time': {'type': 'init', 'py': time.time}, 'exit': {'type': 'init', 'py': sys.exit}, 'boxify': {'type': 'init', 'py': boxify}, 'whole': {'type':'init', 'py': int}, 'exec': {"type": "init", "py": code_Aexec}, 'eval': {"type": "init", "py": code_Aeval}, 'range': {'type': 'init', 'py': Arange}, 'random': {'type': 'init', 'py': random.random}, 'setRandomSeed': {'type': 'init', 'py': random.seed}}
 
 stringTextREGEX = r"( *)((((\')((\\([a-z\\\"\']))|[^\\\'])*(\'))|((\")((\\([a-z\\\"\']))|[^\\\"])*(\"))))( *)"
 numberTextREGEX = r"( *)([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
-varTextREGEX = r"( *)([a-z]|[A-Z])([a-zA-Z0-9]*)( *)"
-bracketsTextREGEX = r"\(.*\)"
+varTextREGEX = r"( *)([a-z]|[A-Z])([a-zA-Z0-9]*)((\[.*\])*)( *)"
+bracketsTextREGEX = r"( *)\(.*\)( *)"
 functionTextREGEX = r"( *)(([a-z]|[A-Z])([a-zA-Z0-9]*))\(.*\)( *)"
-itemsTextREGEX = r"[.]"
-cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}"
+switchTextREGEX = r"( *).+\?.+\:.+( *)"
+itemsTextREGEX = r"( *)\[.*\]( *)"
+remTextREGEX = fr"( *)del( +)({varTextREGEX})( *)"
+cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}|{switchTextREGEX}|{itemsTextREGEX}"
 cobinedcompiled = re.compile(cobined)
 bracketsTest = re.compile(bracketsTextREGEX)
 stringTest = re.compile(stringTextREGEX)
+itemscompiled = re.compile(itemsTextREGEX)
+remcompiled = re.compile(remTextREGEX)
 functionTest = re.compile(functionTextREGEX)
+switchcompiled = re.compile(switchTextREGEX)
 numberTest = re.compile(numberTextREGEX)
 setVarREGEX = fr"( *)(((const|var) ({varTextREGEX})(( +)=( +).+)?)|(([a-z]|[A-Z])+)(( +)=( +).+))( *)"
 setVar = re.compile(
     setVarREGEX
 )
-cobinedevalcompiled = re.compile(fr"{cobined}|{setVarREGEX}")
+cobinedevalcompiled = re.compile(fr"{cobined}|{setVarREGEX}|{remTextREGEX}")
 evalcompiled = re.compile(r"( *)( *)")
 varTest = re.compile(varTextREGEX)
 
@@ -154,12 +175,10 @@ def runSub(subname, args):
             'type': 'var', 'value': args[i]}
     run(vars[subname]['f']['code'], kwargs)
 
-# value Argon executer
-
-
-def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]:
-    didprocess = False
-    output = None
+# value Argon executer takes in a string and runs it through the parser
+def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]: # returns a tuple of a bool and a value
+    didprocess = False # did the string get processed
+    output = None # the output of the string
     if not eval and setVar.fullmatch(string):
         stringsplit = string.split("=")
         if len(stringsplit) > 1:
@@ -176,15 +195,44 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]:
         if varname == "" and type not in ["const", "var"]:
             varname = type
             type = "var"
-        if varname in vars and vars[varname]["type"] == "const":
-            raise Exception(f"Variable {varname} is already a constant")
+        if varname in vars:
+            if vars[varname]["type"] == "init":
+                raise Exception(f'Variable {varname} is an initialized variable')
+            elif vars[varname]["type"] == "const":
+                raise Exception(f"Variable {varname} is already a constant")
         vars[varname] = {"type": type, "value": value}
-    elif not eval and re.fullmatch(fr"rem( +)({varTextREGEX})", string):
-        varname = re.split(r"( +)", string)[2]
+    elif not eval and remcompiled.fullmatch(string):
+        var = re.split(r"( +)", string)[2]
+        bracketSplit = var.strip().split("[")
+        varname = bracketSplit[0]
         if varname in vars:
             if vars[varname]["type"] == "init":
                 raise Exception(f'Cannot delete initialized variable')
-            del vars[varname]
+            if len(bracketSplit) > 1:
+                brackets = "["+('['.join(bracketSplit[1:]))
+                bracketslist = []
+                process = []
+                inbracket = 0
+                for i in range(len(brackets)):
+                    char = brackets[i]
+                    if inbracket == 0 and char == "[":
+                        inbracket += 1
+                    elif inbracket >= 1 and char == "]":
+                        inbracket -= 1
+                        if inbracket == 0:
+                            bracketslist.append(Aexec("".join(process), True, vars=vars)[1])
+                            process = []
+                        else:
+                            process.append(char)
+                    else:
+                        process.append(char)
+                
+                val = vars[varname]['value']
+                for i in range(len(bracketslist)-1):
+                    val = val[bracketslist[i]]
+                val.pop(bracketslist[-1])
+            else:
+                del vars[varname]
         else:
             raise Exception(f"Variable {varname} does not exist")
     elif bracketsTest.fullmatch(string):
@@ -198,14 +246,82 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]:
         output = number(string)
     elif varTest.fullmatch(string):
         didprocess = True
-        var = string.strip()
+        bracketSplit = string.strip().split("[")
+        var = bracketSplit[0]
         if var in vars:
             if 'f' in vars[var] or 'py' in vars[var]:
                 output = f'function({var})'
             else:
-                output = vars[var]["value"]
+                if len(bracketSplit) > 1:
+                    brackets = "["+('['.join(bracketSplit[1:]))
+                    bracketslist = []
+                    process = []
+                    inbracket = 0
+                    for i in range(len(brackets)):
+                        char = brackets[i]
+                        if inbracket == 0 and char == "[":
+                            inbracket += 1
+                        elif inbracket >= 1 and char == "]":
+                            inbracket -= 1
+                            if inbracket == 0:
+                                bracketslist.append(Aexec("".join(process), True, vars=vars)[1])
+                                process = []
+                            else:
+                                process.append(char)
+                        else:
+                            process.append(char)
+                    
+                    output = vars[var]['value']
+                    for i in range(len(bracketslist)):
+                        output = output[bracketslist[i]]
+                else:
+                    output = vars[var]["value"]
         else:
             raise Exception(f"Variable {var} does not exist")
+    elif switchcompiled.fullmatch(string):
+        process = []
+        switchlen = 0
+        switchval = None
+        breaks = False
+        for i in range(len(string)):
+            switchlen += 1
+            if string[i] == "?":
+                try:
+                    switchval = Aexec("".join(process), True, vars=vars)[1]
+                    breaks = True
+                    break
+                except SyntaxError:
+                    pass
+            process.append(string[i])
+        if not breaks:
+            raise Exception(f"invalid 'checker' value within switch statement")
+        if switchval:
+            process = []
+            for i in range(len(string[switchlen+1:])):
+                char = string[switchlen+1+i]
+                if char == ":":
+                    try:
+                        didprocess,output = Aexec("".join(process), True, vars=vars)
+                        breaks = True
+                        break
+                    except SyntaxError:
+                        pass
+                process.append(char)
+            if not breaks:
+                raise Exception(f"invalid 'yes' value within switch statement")
+        else:
+            process = []
+            for i in range(len(string)):
+                char = string[len(string)-i-1]
+                if char == ":":
+                    try:
+                        didprocess,output = Aexec("".join(process), True, vars=vars)
+                        break
+                    except SyntaxError:
+                        pass
+                process.insert(0, char)
+            if not breaks:
+                raise Exception(f"invalid 'no' value within switch statement")
     elif functionTest.fullmatch(string):
         function = string.strip().split("(")
         funcname = function[0]
@@ -219,7 +335,7 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]:
                     try:
                       funcprams.append(Aexec("".join(process)[:-1], True, vars=vars)[1])
                       process = []
-                    except:
+                    except SyntaxError:
                       pass
         if len(process) > 0:
             funcprams.append(Aexec("".join(process), True, vars=vars)[1])
@@ -236,20 +352,36 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]:
                 raise Exception(f"Variable {funcname} is not a function")
         else:
             raise Exception(f"Function {funcname} does not exist")
+    elif itemscompiled.fullmatch(string):
+        itemsText = string.strip()[1:-1]
+        items = []
+        process = []
+        for i in range(len(itemsText)):
+            process.append(itemsText[i])
+            if itemsText[i] == ",":
+                    try:
+                      items.append(Aexec("".join(process)[:-1], True, vars=vars)[1])
+                      process = []
+                    except SyntaxError:
+                      pass
+        if len(process) > 0:
+            items.append(Aexec("".join(process), True, vars=vars)[1])
+        didprocess = True
+        output = items
     else:
         raise SyntaxError(f"invalid syntax")
     return didprocess, output
 
 
 # bodmas stands for brackets, order of operations, division, multiplication, addition, subtraction
-def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]:
+def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]: # Aexec stands for Argon Execution
     string = string.strip()
     if (eval and cobinedcompiled.fullmatch(string)) or (not eval and cobinedevalcompiled.fullmatch(string)):
         return val_Aexec(string, eval, vars=vars)
     elif bracketsTest.fullmatch(string) and string.startswith("(") and string.endswith(")"):
         try:
           return Aexec(string[1:-1], eval, vars=vars)
-        except:
+        except SyntaxError:
           pass
     processes = [" and ", " or ", " not in ", " in ", "<=", ">=", "<-", ">-", "!=", "==", "-", "+", "^","*","$", '%',"/"]
     loopoutput = []
@@ -366,11 +498,8 @@ if __name__ == "__main__":
         print(boxify(
             version+'\nMIT LICENCE AGREEMENT\n(https://github.com/Ugric/Argon)',  align='center'))
         while True:
-            try:
                 code = input(">>> ")
                 if code != "":
                     output = (Aexec(code))
                     if output[0]:
                         log(output[1])
-            except Exception as e:
-                print(e)
