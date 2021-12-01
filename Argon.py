@@ -6,7 +6,7 @@ import math
 
 # make a function that takes in a param of any type and returns it as a number
 
-version = "ARGON B1.0"
+version = "ARGON Beta 2.0.0"
 
 
 def number(value):
@@ -19,6 +19,13 @@ def number(value):
     except:
         return float(value)
 
+
+def code_Aexec(string):
+    Aexec(string, False)
+
+
+def code_Aeval(string):
+    return Aexec(string, True)[1]
 
 def log(*args):
     newargs = []
@@ -41,26 +48,27 @@ def boxify(text, length=0, align="left"):
     return ('╔'+((length+2)*'═')+'╗\n'+("\n".join(processed))+'\n╚'+((length+2)*'═')+'╝')
 
 
-def valToArgonString(value):
+def valToArgonString(value, format = True, speach = False):
     if type(value) == int or type(value) == float:
-        return str(value)
+        return '{:,}'.format(number(value))
     elif value == None:
         return "unknown"
     elif value == True:
         return "yes"
     elif value == False:
         return "no"
+    elif speach == True and type(value) == str:
+      return f'"{value}"'
     return value
 
+vars = {'log': {'type': 'init', 'py': log}, 'input': {'type': 'init', 'py': input}, 'PYeval': {'type': 'init', 'py': eval}, 'PYexec': {'type': 'init', 'py': exec}, 'abs': {'type': 'init', 'py': abs}, 'round': {'type': 'init', 'py': round}, 'length': {'type': 'init', 'py': len}, 'number': {'type': 'init', 'py': number}, 'string': {'type': 'init', 'py': str}, 'bool': {'type': 'init', 'py': bool}, 'yes': {'type': 'init', 'value': True}, 'no': {'type': 'init', 'value': False}, 'unknown': {'type': 'init', 'value': None}, 'snooze': {'type': 'init', 'py': time.sleep}, 'time': {'type': 'init', 'py': time.time}, 'exit': {'type': 'init', 'py': sys.exit}, 'boxify': {'type': 'init', 'py': boxify}, 'whole': {'type':'init', 'py': int}, 'exec': {"type": "init", "py": code_Aexec}, 'eval': {"type": "init", "py": code_Aeval}}
 
-vars = {'log': {'type': 'init', 'py': log}, 'input': {'type': 'init', 'py': input}, 'PYeval': {'type': 'init', 'py': eval}, 'PYexec': {'type': 'init', 'py': exec}, 'abs': {'type': 'init', 'py': abs}, 'round': {'type': 'init', 'py': round}, 'length': {'type': 'init', 'py': len}, 'number': {'type': 'init',
-                                                                                                                                                                                                                                                                                                  'py': number}, 'string': {'type': 'init', 'py': str}, 'bool': {'type': 'init', 'py': bool}, 'yes': {'type': 'init', 'value': True}, 'no': {'type': 'init', 'value': False}, 'unknown': {'type': 'init', 'value': None}, 'snooze': {'type': 'init', 'py': time.sleep}, 'time': {'type': 'init', 'py': time.time}, 'exit': {'type': 'init', 'py': sys.exit}, 'boxify': {'type': 'init', 'py': boxify}}
-
-stringTextREGEX = r"( *)((((\')((\\([a-z]|\\|\"))|[^\\])*(\'))|((\")((\\([a-z]|\\|\"))|[^\\])*(\"))))( *)"
+stringTextREGEX = r"( *)((((\')((\\([a-z\\\"\']))|[^\\\'])*(\'))|((\")((\\([a-z\\\"\']))|[^\\\"])*(\"))))( *)"
 numberTextREGEX = r"( *)([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
 varTextREGEX = r"( *)([a-z]|[A-Z])([a-zA-Z0-9]*)( *)"
 bracketsTextREGEX = r"\(.*\)"
 functionTextREGEX = r"( *)(([a-z]|[A-Z])([a-zA-Z0-9]*))\(.*\)( *)"
+itemsTextREGEX = r"[.]"
 cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}"
 cobinedcompiled = re.compile(cobined)
 bracketsTest = re.compile(bracketsTextREGEX)
@@ -146,18 +154,6 @@ def runSub(subname, args):
             'type': 'var', 'value': args[i]}
     run(vars[subname]['f']['code'], kwargs)
 
-
-def code_Aexec(string):
-    Aexec(string, False)
-
-
-def code_Aeval(string):
-    return Aexec(string, True)[1]
-
-
-vars['exec'] = {"type": "init", "py": code_Aexec}
-vars['eval'] = {"type": "init", "py": code_Aeval}
-
 # value Argon executer
 
 
@@ -218,10 +214,13 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]:
         process = []
         for i in range(len(funcpramsTEXT)):
             process.append(funcpramsTEXT[i])
-            if cobinedcompiled.fullmatch("".join(process)[:-1]) and funcpramsTEXT[i] == ",":
-                funcprams.append(
-                    Aexec("".join(process)[:-1], True, vars=vars)[1])
-                process = []
+            if funcpramsTEXT[i] == ",":
+                
+                    try:
+                      funcprams.append(Aexec("".join(process)[:-1], True, vars=vars)[1])
+                      process = []
+                    except:
+                      pass
         if len(process) > 0:
             funcprams.append(Aexec("".join(process), True, vars=vars)[1])
 
@@ -248,44 +247,46 @@ def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]:
     if (eval and cobinedcompiled.fullmatch(string)) or (not eval and cobinedevalcompiled.fullmatch(string)):
         return val_Aexec(string, eval, vars=vars)
     elif bracketsTest.fullmatch(string) and string.startswith("(") and string.endswith(")"):
-        return Aexec(string[1:-1], eval, vars=vars)
-    else:
-      processes = [" and ", " or ", " not in ", " in ", "<=", ">=", "<-", ">-", "!=", "==", "-", "+", "^","*","$","/"]
-      loopoutput = []
-      process = []
-      didprocess = False
-      for i in range(len(string)):
-        process.append(string[i])
-        for x in range(len(processes)):
-          joined = ''.join(process)
-          if joined.endswith(processes[x]):
-            removed = joined[:-len(processes[x])].strip()
-            if cobinedevalcompiled.fullmatch(removed):
-                loopoutput.append(removed)
-                loopoutput.append(processes[x])
-                process = []
-            elif removed.startswith("(") and removed.endswith(")") and cobinedevalcompiled.fullmatch(removed[1:-1]):
-                loopoutput.append(removed)
-                loopoutput.append(processes[x])
-                process = []
-      if len(process)> 0:
-        loopoutput.append("".join(process))
-        process = []
-      didprocess = False
-      output = None
+        try:
+          return Aexec(string[1:-1], eval, vars=vars)
+        except:
+          pass
+    processes = [" and ", " or ", " not in ", " in ", "<=", ">=", "<-", ">-", "!=", "==", "-", "+", "^","*","$", '%',"/"]
+    loopoutput = []
+    process = []
+    didprocess = False
+    for i in range(len(string)):
+      process.append(string[i])
       for x in range(len(processes)):
-        breaks = False
-        for i in range(1,len(loopoutput),2):
-          if processes[x] == loopoutput[i]:
-            output = (math_exec(loopoutput[i], Aexec(''.join(loopoutput[:i]))[1],  Aexec(''.join(loopoutput[i+1:]))[1]))
-            didprocess = True
-            breaks = True
-            break
-        if breaks:
+        joined = ''.join(process)
+        if joined.endswith(processes[x]):
+          removed = joined[:-len(processes[x])].strip()
+          if cobinedevalcompiled.fullmatch(removed):
+              loopoutput.append(removed)
+              loopoutput.append(processes[x])
+              process = []
+          elif removed.startswith("(") and removed.endswith(")"):
+              loopoutput.append(removed)
+              loopoutput.append(processes[x])
+              process = []
+    if len(process)> 0:
+      loopoutput.append("".join(process))
+      process = []
+    didprocess = False
+    output = None
+    for x in range(len(processes)):
+      breaks = False
+      for i in range(1,len(loopoutput),2):
+        if processes[x] == loopoutput[i]:
+          output = (math_exec(loopoutput[i], Aexec(''.join(loopoutput[:i]))[1],  Aexec(''.join(loopoutput[i+1:]))[1]))
+          didprocess = True
+          breaks = True
           break
-      if not didprocess:
-          raise SyntaxError(f"invalid syntax")
-      return didprocess, output
+      if breaks:
+        break
+    if not didprocess:
+        raise SyntaxError(f"invalid syntax")
+    return didprocess, output
 
 
 runnerREGEX = re.compile(
