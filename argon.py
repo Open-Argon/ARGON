@@ -5,11 +5,9 @@ import time
 import math
 import random
 
-# make a function that takes in a param of any type and returns it as a number
-
 version = "ARGON Beta 2.1.0"
 
-
+# make a function that takes in a param of any type and returns it as a number
 def number(value):
     try:
         inted = int(value)
@@ -77,7 +75,7 @@ def Arange(start, stop=None, step=1):
     else:
         return list(range(start, stop - 1, step))
 
-vars = {'log': {'type': 'init', 'py': log}, 'input': {'type': 'init', 'py': input}, 'PYeval': {'type': 'init', 'py': eval}, 'PYexec': {'type': 'init', 'py': exec}, 'abs': {'type': 'init', 'py': abs}, 'round': {'type': 'init', 'py': round}, 'length': {'type': 'init', 'py': len}, 'number': {'type': 'init', 'py': number}, 'string': {'type': 'init', 'py': str}, 'bool': {'type': 'init', 'py': bool}, 'yes': {'type': 'init', 'value': True}, 'no': {'type': 'init', 'value': False}, 'unknown': {'type': 'init', 'value': None}, 'snooze': {'type': 'init', 'py': time.sleep}, 'time': {'type': 'init', 'py': time.time}, 'exit': {'type': 'init', 'py': sys.exit}, 'boxify': {'type': 'init', 'py': boxify}, 'whole': {'type':'init', 'py': int}, 'exec': {"type": "init", "py": code_Aexec}, 'eval': {"type": "init", "py": code_Aeval}, 'range': {'type': 'init', 'py': Arange}, 'random': {'type': 'init', 'py': random.random}, 'setRandomSeed': {'type': 'init', 'py': random.seed}}
+vars = {'log': {'type': 'init', 'py': log}, 'input': {'type': 'init', 'py': input}, 'PYeval': {'type': 'init', 'py': eval}, 'PYexec': {'type': 'init', 'py': exec}, 'abs': {'type': 'init', 'py': abs}, 'round': {'type': 'init', 'py': round}, 'length': {'type': 'init', 'py': len}, 'number': {'type': 'init', 'py': number}, 'string': {'type': 'init', 'py': str}, 'bool': {'type': 'init', 'py': bool}, 'yes': {'type': 'init', 'value': True}, 'no': {'type': 'init', 'value': False}, 'unknown': {'type': 'init', 'value': None}, 'snooze': {'type': 'init', 'py': time.sleep}, 'time': {'type': 'init', 'py': time.time}, 'exit': {'type': 'init', 'py': sys.exit}, 'boxify': {'type': 'init', 'py': boxify}, 'whole': {'type':'init', 'py': int}, 'exec': {"type": "init", "py": code_Aexec}, 'eval': {"type": "init", "py": code_Aeval}, 'range': {'type': 'init', 'py': Arange}, 'random': {'type': 'init', 'py': random.random}, 'setRandomSeed': {'type': 'init', 'py': random.seed}, 'join': {'type': 'init', 'py': lambda by, list: by.join(list)}, 'split': {'type': 'init', 'py': lambda by, string: string.split(by)}, 'replace': {'type': 'init', 'py': lambda from_, to, string: string.replace(from_, to)}}
 
 stringTextREGEX = r"( *)((((\')((\\([a-z\\\"\']))|[^\\\'])*(\'))|((\")((\\([a-z\\\"\']))|[^\\\"])*(\"))))( *)"
 numberTextREGEX = r"( *)([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
@@ -98,7 +96,7 @@ remcompiled = re.compile(remTextREGEX)
 functionTest = re.compile(functionTextREGEX)
 switchcompiled = re.compile(switchTextREGEX)
 numberTest = re.compile(numberTextREGEX)
-setVarREGEX = fr"( *)(((const|var) ({varTextREGEX})(( +)=( +).+)?)|(([a-z]|[A-Z])+)(( +)=( +).+))( *)"
+setVarREGEX = fr"( *)(((const|var) ({varTextREGEX})(( +)=( +).+)?)|({varTextREGEX})(( +)=( +).+))( *)"
 setVar = re.compile(
     setVarREGEX
 )
@@ -121,6 +119,34 @@ def convert_backslash(string):
     string = re.sub(r"\\u([a-fA-F0-9]{4})",
                     lambda x: chr(int(x.group(1), 16)), string)
     return string
+
+# make a function that takes in variable and outputs 2 things, the variable name and the itterable indexes
+# e.g. variable: 'my2DList[1][4]' will output name: "my2DList" and indexes: [1, 4]
+# to get the true value of the indexes the Aexec function
+def get_var_name_and_indexes(variable):
+    bracketSplit = variable.strip().split("[")
+    varName = bracketSplit[0]
+    indexes = []
+    if len(bracketSplit) > 1:
+        brackets = "["+('['.join(bracketSplit[1:]))
+        process = []
+        inbracket = 0
+        for i in range(len(brackets)):
+            char = brackets[i]
+            if inbracket == 0 and char == "[":
+                inbracket += 1
+            elif inbracket >= 1 and char == "]":
+                inbracket -= 1
+                if inbracket == 0:
+                    indexes.append(Aexec("".join(process), True, vars=vars)[1])
+                    process = []
+                else:
+                    process.append(char)
+            else:
+                process.append(char)
+    return varName, indexes
+    
+
 
 
 # make a function takes takes in 2 values, a mathermatical operator and 2 values and returns the result
@@ -145,6 +171,14 @@ def math_exec(operator, value1, value2):
         return value1 == value2
     elif operator == "!=":
         return value1 != value2
+    elif operator == "===":
+        if isinstance(value2, type(value1)):
+            return value1 == value2
+        return False
+    elif operator == "!==":
+        if isinstance(value2, type(value1)):
+            return value1 != value2
+        return False
     elif operator == ">-":
         return value1 > value2
     elif operator == "<-":
@@ -183,9 +217,11 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]: # returns a tu
     didprocess = False # did the string get processed
     output = None # the output of the string
     if not eval and setVar.fullmatch(string):
+        string = string.strip()
         typeAndVar = re.split(r"( +)", string)
         varname = []
-        aftertype = "".join(typeAndVar[2:])
+        varnamearray = []
+        aftertype = string[5:] if string[0:5] == "const" else string[3:] if string[0:3] == "var" else string
         value = None
         type = typeAndVar[0]
         if type not in ["const", "var"]:
@@ -193,21 +229,31 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]: # returns a tu
             type = "var"
         for i in range(len(aftertype)):
           char = aftertype[i]
-          joined = "".join(varname)
+          joined = "".join(varnamearray)
           if i == len(aftertype)-1 and varTest.fullmatch(joined):
+            varnamearray.append(char)
+            joined = "".join(varnamearray)
             varname = joined.strip()
             break
           elif char == "=" and varTest.fullmatch(joined):
             value = Aexec(aftertype[len(joined)+1:], eval=True,vars=vars)[1]
             varname = joined.strip()
             break
-          varname.append(char)
+          else:
+            varnamearray.append(char)
+        varname, brackets = get_var_name_and_indexes(varname)
         if varname in vars:
             if vars[varname]["type"] == "init":
                 raise Exception(f'Variable {varname} is an initialized variable')
-            elif vars[varname]["type"] == "const":
+            elif vars[varname]["type"] == "const" and len(brackets) == 0:
                 raise Exception(f"Variable {varname} is already a constant")
-        vars[varname] = {"type": type, "value": value}
+        if len(brackets) == 0:
+            vars[varname] = {"type": type, "value": value}
+        else:
+            val = vars[varname]["value"]
+            for i in range(len(brackets)-1):
+                val = val[brackets[i]]
+            val[brackets[-1]] = value
     elif not eval and remcompiled.fullmatch(string):
         var = re.split(r"( +)", string)[2]
         bracketSplit = var.strip().split("[")
@@ -340,7 +386,6 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]: # returns a tu
         for i in range(len(funcpramsTEXT)):
             process.append(funcpramsTEXT[i])
             if funcpramsTEXT[i] == ",":
-                
                     try:
                       funcprams.append(Aexec("".join(process)[:-1], True, vars=vars)[1])
                       process = []
