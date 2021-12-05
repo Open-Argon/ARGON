@@ -78,7 +78,7 @@ Books (Dictionaries or Objects):
 ## How do I run Argon?
 
 Setup:
-- download the Argon executable for [Windows](https://github.com/Ugric/Argon/raw/main/dist/argon.exe) or [MacOS](https://github.com/Ugric/Argon/raw/main/dist/argon)
+- download the Argon executable for [Windows](https://github.com/Ugric/Argon/raw/main/dist/Windows/argon.exe), [MacOS](https://github.com/Ugric/Argon/raw/main/dist/macOS/argon) or [Linux](https://github.com/Ugric/Argon/raw/main/dist/Linux/argon)
 
 Run a file:
 - make a file with the extention as `.ar` and put your Argon code inside that file
