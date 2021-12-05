@@ -1,14 +1,52 @@
 import re
-from typing import Tuple
+from typing import Any, Tuple
 import sys
 import time
 import math
 import random
+import json
 
-version = "ARGON Beta 2.1.0"
+version = "ARGON Beta 2.2.0"
+
+# make a function that takes in 2 params, colour and text and outputs a coloured text
+def colourify(colour, text):
+    if colour == None:
+        return text
+    elif colour == "red":
+        return "\033[31m" + text + "\033[0m"
+    elif colour == "green":
+        return "\033[32m" + text + "\033[0m"
+    elif colour == "yellow":
+        return "\033[33m" + text + "\033[0m"
+    elif colour == "blue":
+        return "\033[34m" + text + "\033[0m"
+    elif colour == "purple":
+        return "\033[35m" + text + "\033[0m"
+    elif colour == "cyan":
+        return "\033[36m" + text + "\033[0m"
+    elif colour == "white":
+        return "\033[37m" + text + "\033[0m"
+    elif colour == "black":
+        return "\033[30m" + text + "\033[0m"
+    elif colour == "grey":
+        return "\033[90m" + text + "\033[0m"
+    elif colour == "orange":
+        return "\033[33m" + text + "\033[0m"
+    elif colour == "grey":
+        return "\033[90m" + text + "\033[0m"
+    elif colour == "lightred":
+        return "\033[91m" + text + "\033[0m"
+    elif colour == "lightgreen":
+        return "\033[92m" + text + "\033[0m"
+    elif colour == "lightyellow":
+        return "\033[93m" + text + "\033[0m"
+    elif colour == "lightblue":
+        return "\033[94m" + text + "\033[0m"
+    elif colour == "lightpurple":
+        return "\033[95m" + text + "\033[0m"
 
 # make a function that takes in a param of any type and returns it as a number
-def number(value):
+def number(value: Any) -> (int | float):
     try:
         inted = int(value)
         floated = float(value)
@@ -47,21 +85,21 @@ def boxify(text, length=0, align="left"):
     return ('╔'+((length+2)*'═')+'╗\n'+("\n".join(processed))+'\n╚'+((length+2)*'═')+'╝')
 
 
-def valToArgonString(value, speach = False):
+def valToArgonString(value, speach = False, colour = True):
     if type(value) == int or type(value) == float:
-        return str(value)
+        return colourify('cyan' if colour else None, str(value))
     elif value == None:
-        return "unknown"
+        return colourify('grey' if colour else None, "unknown")
     elif value == True:
-        return "yes"
+        return colourify('green' if colour else None, "yes")
     elif value == False:
-        return "no"
+        return colourify('red' if colour else None, "no")
     elif type(value) == dict:
-        return "{" + ", ".join(f"{valToArgonString(key, speach=True)}: {valToArgonString(value[key], speach=True)}" for key in value) + "}"
+        return "{" + ", ".join(f"{valToArgonString(key, speach=True, colour=colour)}: {valToArgonString(value[key], speach=True, colour=colour)}" for key in value) + "}"
     elif type(value) in [list, tuple]:
-        return "[" + ", ".join(valToArgonString(i, speach=True) for i in value) + "]"
+        return "[" + ", ".join(valToArgonString(i, speach=True, colour=colour) for i in value) + "]"
     elif speach == True and type(value) == str:
-      return f'"{value}"'
+      return colourify('yellow' if colour else None, f'\'{value}\'')
     return value
 
 def Arange(start, stop=None, step=1):
@@ -75,21 +113,69 @@ def Arange(start, stop=None, step=1):
     else:
         return list(range(start, stop - 1, step))
 
-vars = {'log': {'type': 'init', 'py': log}, 'input': {'type': 'init', 'py': input}, 'PYeval': {'type': 'init', 'py': eval}, 'PYexec': {'type': 'init', 'py': exec}, 'abs': {'type': 'init', 'py': abs}, 'round': {'type': 'init', 'py': round}, 'length': {'type': 'init', 'py': len}, 'number': {'type': 'init', 'py': number}, 'string': {'type': 'init', 'py': str}, 'bool': {'type': 'init', 'py': bool}, 'yes': {'type': 'init', 'value': True}, 'no': {'type': 'init', 'value': False}, 'unknown': {'type': 'init', 'value': None}, 'snooze': {'type': 'init', 'py': time.sleep}, 'time': {'type': 'init', 'py': time.time}, 'exit': {'type': 'init', 'py': sys.exit}, 'boxify': {'type': 'init', 'py': boxify}, 'whole': {'type':'init', 'py': int}, 'exec': {"type": "init", "py": code_Aexec}, 'eval': {"type": "init", "py": code_Aeval}, 'range': {'type': 'init', 'py': Arange}, 'random': {'type': 'init', 'py': random.random}, 'setRandomSeed': {'type': 'init', 'py': random.seed}, 'join': {'type': 'init', 'py': lambda by, list: by.join(list)}, 'split': {'type': 'init', 'py': lambda by, string: string.split(by)}, 'replace': {'type': 'init', 'py': lambda from_, to, string: string.replace(from_, to)}}
+vars = {
+    'log': {'type': 'init', 'py': log},
+    'input': {'type': 'init', 'py': input},
+    'PYeval': {'type': 'init', 'py': eval},
+    'PYexec': {'type': 'init', 'py': exec},
+    'abs': {'type': 'init', 'py': abs},
+    'round': {'type': 'init', 'py': round},
+    'length': {'type': 'init', 'py': len},
+    'number': {'type': 'init', 'py': number},
+    'numberToBinary': {'type': 'init', 'py': lambda x: bin(x)[2:]},
+    'numberToHex': {'type': 'init', 'py': lambda x: hex(x)[2:]},
+    'numberToOctal': {'type': 'init', 'py': lambda x: oct(x)[2:]},
+    'binaryToNumber': {'type': 'init', 'py': lambda x: int(x, 2)},
+    'hexToNumber': {'type': 'init', 'py': lambda x: int(x, 16)},
+    'octalToNumber': {'type': 'init', 'py': lambda x: int(x, 8)},
+    'string': {'type': 'init', 'py': lambda x: valToArgonString(x, colour=False)}, 
+    'logic': {'type': 'init', 'py': bool},
+    'yes': {'type': 'init', 'value': True},
+    'no': {'type': 'init', 'value': False},
+    'unknown': {'type': 'init', 'value': None},
+    'snooze': {'type': 'init', 'py': time.sleep},
+    'time': {'type': 'init', 'py': time.time},
+    'exit': {'type': 'init', 'py': sys.exit},
+    'boxify': {'type': 'init', 'py': boxify},
+    'whole': {'type':'init', 'py': int},
+    'book': {'type':'init', 'py': dict},
+    'exec': {"type": "init", "py": code_Aexec},
+    'eval': {"type": "init", "py": code_Aeval},
+    'range': {'type': 'init', 'py': Arange},
+    'random': {'type': 'init', 'py': random.random},
+    'setRandomSeed': {'type': 'init', 'py': random.seed},
+    'join': {'type': 'init', 'py': lambda by, list: by.join(list)},
+    'split': {'type': 'init', 'py': lambda by, string: string.split(by)},
+    'replace': {'type': 'init', 'py': lambda from_, to, string: string.replace(from_, to)},
+    'readFile':{'type': 'init', 'py': lambda filename: open(filename, 'r').read()},
+    'writeFile':{'type': 'init', 'py': lambda filename, text: open(filename, 'w').write(text)},
+    'appendFile':{'type': 'init', 'py': lambda filename, text: open(filename, 'a').write(text)},
+    'readLines':{'type': 'init', 'py': lambda filename: open(filename, 'r').readlines()},
+    'writeLines':{'type': 'init', 'py': lambda filename, lines: open(filename, 'w').writelines(lines)},
+    'appendLines':{'type': 'init', 'py': lambda filename, lines: open(filename, 'a').writelines(lines)},
+    'JSONparse':{'type': 'init', 'py': json.loads},
+    'JSONstringify':{'type': 'init', 'py': json.dumps},
+}
 
 stringTextREGEX = r"( *)((((\')((\\([a-z\\\"\']))|[^\\\'])*(\'))|((\")((\\([a-z\\\"\']))|[^\\\"])*(\"))))( *)"
-numberTextREGEX = r"( *)([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
-varTextREGEX = r"( *)([a-z]|[A-Z])([a-zA-Z0-9]*)((\[.*\])*)( *)"
+numberTextREGEX = r"( *)(\-)?([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
+varNoSpace = r'([a-z]|[A-Z])([a-zA-Z0-9]*)((\[.*\])*)'
+varTextREGEX = fr"( *){varNoSpace}( *)"
+bookTextREGEX = r"( *)\{(( *).+( *):( *).+( *))(( *)\,( *).+( *):( *).+( *))*\}( *)"
 bracketsTextREGEX = r"( *)\(.*\)( *)"
 commentTextREGEX = r'( *)\#(.*)( *)'
 functionTextREGEX = r"( *)(([a-z]|[A-Z])([a-zA-Z0-9]*))\(.*\)( *)"
+varAdd1 = fr"( *){varNoSpace}\+\+( *)"
 switchTextREGEX = r"( *).+\?.+\:.+( *)"
 itemsTextREGEX = r"( *)\[.*\]( *)"
 remTextREGEX = fr"( *)del( +)({varTextREGEX})( *)"
-cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}|{switchTextREGEX}|{itemsTextREGEX}|{commentTextREGEX}"
+appendTextREGEX = fr"( *)append( +)({varTextREGEX})( +).+( *)"
+cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}|{switchTextREGEX}|{itemsTextREGEX}|{commentTextREGEX}|{bookTextREGEX}|{bracketsTextREGEX}|{varAdd1}"
 commentTest = re.compile(commentTextREGEX)
 cobinedcompiled = re.compile(cobined)
+bookcompiled = re.compile(bookTextREGEX)
 bracketsTest = re.compile(bracketsTextREGEX)
+varAdd1compiled = re.compile(varAdd1)
 stringTest = re.compile(stringTextREGEX)
 itemscompiled = re.compile(itemsTextREGEX)
 remcompiled = re.compile(remTextREGEX)
@@ -213,10 +299,12 @@ def runSub(subname, args):
     run(vars[subname]['f']['code'], kwargs)
 
 # value Argon executer takes in a string and runs it through the parser
-def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]: # returns a tuple of a bool and a value
+def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]: # returns a tuple of a bool and a value
     didprocess = False # did the string get processed
     output = None # the output of the string
-    if not eval and setVar.fullmatch(string):
+    if commentTest.fullmatch(string) or string.strip() == "":
+        pass
+    elif not eval and setVar.fullmatch(string):
         string = string.strip()
         typeAndVar = re.split(r"( +)", string)
         varname = []
@@ -254,6 +342,7 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]: # returns a tu
             for i in range(len(brackets)-1):
                 val = val[brackets[i]]
             val[brackets[-1]] = value
+    
     elif not eval and remcompiled.fullmatch(string):
         var = re.split(r"( +)", string)[2]
         bracketSplit = var.strip().split("[")
@@ -297,8 +386,6 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]: # returns a tu
     elif numberTest.fullmatch(string):
         didprocess = True
         output = number(string)
-    elif commentTest.fullmatch(string):
-      pass
     elif varTest.fullmatch(string):
         didprocess = True
         bracketSplit = string.strip().split("[")
@@ -406,6 +493,59 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, any]: # returns a tu
                 raise Exception(f"Variable {funcname} is not a function")
         else:
             raise Exception(f"Function {funcname} does not exist")
+    elif varAdd1compiled.fullmatch(string):
+        didprocess = True
+        string = string.strip()
+        var = string[:-2]
+        varname, brackets = get_var_name_and_indexes(var)
+        if varname in vars:
+            if vars[varname]["type"] == "init":
+                raise Exception(f'Cannot add to initialized variable')
+            if brackets:
+                val = vars[varname]['value']
+                for i in range(len(brackets)):
+                    val = val[brackets[i]]
+                val += 1
+                output = val
+            else:
+                vars[varname]["value"] += 1
+                output = vars[varname]["value"]
+        else:
+            raise Exception(f"Variable {varname} does not exist")
+    elif bookcompiled.fullmatch(string):
+        didprocess = True
+        string = string.strip()[1:-1]
+        output = {}
+        process = []
+        key = None
+        iskey = False
+        for i in range(len(string)):
+            char = string[i]
+            if iskey:
+                if char == ",":
+                    try:
+                        output[key] = Aexec("".join(process), True, vars=vars)[1]
+                        process = []
+                        iskey = False
+                        key = None
+                    except SyntaxError:
+                        pass
+                else:
+                    process.append(char)
+            else:
+                if char == ":":
+                    try:
+                        key = Aexec("".join(process), True, vars=vars)[1]
+                        if key in output:
+                            raise Exception(f'Key \'{key}\' already exists')
+                        iskey = True
+                        process = []
+                    except SyntaxError:
+                        pass
+                else:
+                    process.append(char)
+        if iskey:
+            output[key] = Aexec("".join(process), True, vars=vars)[1]
     elif itemscompiled.fullmatch(string):
         itemsText = string.strip()[1:-1]
         items = []
@@ -464,10 +604,10 @@ def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]: # Aexec stands for
       breaks = False
       for i in range(1,len(loopoutput),2):
         if processes[x] == loopoutput[i]:
-          output = (math_exec(loopoutput[i], Aexec(''.join(loopoutput[:i]))[1],  Aexec(''.join(loopoutput[i+1:]))[1]))
-          didprocess = True
-          breaks = True
-          break
+            didprocess = True
+            output = (math_exec(loopoutput[i], Aexec(''.join(loopoutput[:i]))[1],  Aexec(''.join(loopoutput[i+1:]))[1]))
+            breaks = True
+            break
       if breaks:
         break
     if not didprocess:
@@ -498,6 +638,7 @@ def run(code: list, vars=vars):
                     subdata = "".join(line.strip().split(' ')[1:]).split('(')
                     subname = subdata[0]
                     prams = '('.join(subdata[1:]).split(')')[0].split(',')
+                    print(subname, prams)
                 else:
                     Runnercheck = ''.join(line.strip().split(' ')[1:])[
                         :-1].strip()[1:-1]

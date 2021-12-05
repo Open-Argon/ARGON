@@ -1,11 +1,19 @@
-const password = input('set password: ')
-var guess
-
-while (password != guess) [
-    guess = input('password: ')
-    if (password != guess) [
-        log('wrong password')
+var biggest = [0, 0]
+var i = 1
+while (yes) [
+    var steps = 0
+    var num = i
+    while (num != 1) [
+        steps++
+        if (num % 2 == 0) [
+            num = num / 2
+        ] else [
+            num = num * 3 + 1
+        ]
     ]
+    if (steps >- biggest[1]) [
+        biggest = [i, steps]
+        log(biggest)
+    ]
+    i++
 ]
-
-log('correct password')
