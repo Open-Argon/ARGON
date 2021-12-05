@@ -1,6 +1,7 @@
 var biggest = [0, 0]
 var i = 1
-while (yes) [
+const limit = 1000
+while (i <- limit) [
     var steps = 0
     var num = i
     while (num != 1) [
@@ -13,7 +14,8 @@ while (yes) [
     ]
     if (steps >- biggest[1]) [
         biggest = [i, steps]
-        log(biggest)
+        log(biggest[0], 'takes', biggest[1], 'steps')
     ]
     i++
 ]
+log('in the first', limit, 'numbers, the biggest number is', biggest[0], 'and it takes', biggest[1], 'steps')
