@@ -82,7 +82,7 @@ Setup:
 
 Run a file:
 - make a file with the extention as `.ar` and put your Argon code inside that file
-- call the Argon executable with a parameter with the directory to your .ar file, (e.g. `$ argon example.ar`)
+- call the Argon executable with a parameter as the path to your `.ar` file, (e.g. `$ argon example.ar`)
 
 Run the shell:
 - run the Argon executable without any parameters, (e.g. `$ argon`)
