@@ -6,7 +6,7 @@ import math
 import random
 import json
 
-version = "ARGON Beta 2.2.0"
+version = "ARGON Beta 2.2.1"
 
 # make a function that takes in 2 params, colour and text and outputs a coloured text
 def colourify(colour, text):
@@ -56,6 +56,16 @@ def number(value: Any) -> (int | float):
     except:
         return float(value)
 
+def Atype(value):
+    return {
+        int: [number,"number"],
+        float: [number,"number"],
+        str: [valToArgonString,"string"],
+        bool: [bool,"logic"],
+        list: [list,"items"],
+        tuple: [list,"items"],
+        dict: [dict,"book"],
+    }[type(value)]
 
 def code_Aexec(string):
     Aexec(string, False)
@@ -100,7 +110,7 @@ def valToArgonString(value, speach = False, colour = True):
         return "[" + ", ".join(valToArgonString(i, speach=True, colour=colour) for i in value) + "]"
     elif speach == True and type(value) == str:
       return colourify('yellow' if colour else None, f'\'{value}\'')
-    return value
+    return str(value)
 
 def Arange(start, stop=None, step=1):
     if stop == None:
@@ -122,6 +132,8 @@ vars = {
     'round': {'type': 'init', 'py': round},
     'length': {'type': 'init', 'py': len},
     'number': {'type': 'init', 'py': number},
+    'char': {'type': 'init', 'py': chr},
+    'ord': {'type': 'init', 'py': ord},
     'numberToBinary': {'type': 'init', 'py': lambda x: bin(x)[2:]},
     'numberToHex': {'type': 'init', 'py': lambda x: hex(x)[2:]},
     'numberToOctal': {'type': 'init', 'py': lambda x: oct(x)[2:]},
@@ -142,6 +154,7 @@ vars = {
     'exec': {"type": "init", "py": code_Aexec},
     'eval': {"type": "init", "py": code_Aeval},
     'range': {'type': 'init', 'py': Arange},
+    'type': {'type': 'init', 'py': Atype},
     'random': {'type': 'init', 'py': random.random},
     'setRandomSeed': {'type': 'init', 'py': random.seed},
     'join': {'type': 'init', 'py': lambda by, list: by.join(list)},
@@ -155,6 +168,33 @@ vars = {
     'appendLines':{'type': 'init', 'py': lambda filename, lines: open(filename, 'a').writelines(lines)},
     'JSONparse':{'type': 'init', 'py': json.loads},
     'JSONstringify':{'type': 'init', 'py': json.dumps},
+    'pi': {'type': 'init', 'value': math.pi},
+    'e': {'type': 'init', 'value': math.e},
+    'sin': {'type': 'init', 'py': math.sin},
+    'cos': {'type': 'init', 'py': math.cos},
+    'tan': {'type': 'init', 'py': math.tan},
+    'asin': {'type': 'init', 'py': math.asin},
+    'acos': {'type': 'init', 'py': math.acos},
+    'atan': {'type': 'init', 'py': math.atan},
+    'atan2': {'type': 'init', 'py': math.atan2},
+    'sinh': {'type': 'init', 'py': math.sinh},
+    'cosh': {'type': 'init', 'py': math.cosh},
+    'tanh': {'type': 'init', 'py': math.tanh},
+    'asinh': {'type': 'init', 'py': math.asinh},
+    'acosh': {'type': 'init', 'py': math.acosh},
+    'atanh': {'type': 'init', 'py': math.atanh},
+    'radians': {'type': 'init', 'py': math.radians},
+    'exp': {'type': 'init', 'py': math.exp},
+    'logarithm': {'type': 'init', 'py': math.log},
+    'logarithm10': {'type': 'init', 'py': math.log10},
+    'logarithm2': {'type': 'init', 'py': math.log2},
+    'sqrt': {'type': 'init', 'py': math.sqrt},
+    'ceil': {'type': 'init', 'py': math.ceil},
+    'floor': {'type': 'init', 'py': math.floor},
+    'pow': {'type': 'init', 'py': math.pow},
+    'hypot': {'type': 'init', 'py': math.hypot},
+    'degrees': {'type': 'init', 'py': math.degrees},
+    'radians': {'type': 'init', 'py': math.radians},
 }
 
 stringTextREGEX = r"( *)((((\')((\\([a-z\\\"\']))|[^\\\'])*(\'))|((\")((\\([a-z\\\"\']))|[^\\\"])*(\"))))( *)"
@@ -170,7 +210,7 @@ switchTextREGEX = r"( *).+\?.+\:.+( *)"
 itemsTextREGEX = r"( *)\[.*\]( *)"
 remTextREGEX = fr"( *)del( +)({varTextREGEX})( *)"
 appendTextREGEX = fr"( *)append( +)({varTextREGEX})( +).+( *)"
-cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}|{switchTextREGEX}|{itemsTextREGEX}|{commentTextREGEX}|{bookTextREGEX}|{bracketsTextREGEX}|{varAdd1}"
+cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}|{switchTextREGEX}|{itemsTextREGEX}|{commentTextREGEX}|{bookTextREGEX}|{varAdd1}"
 commentTest = re.compile(commentTextREGEX)
 cobinedcompiled = re.compile(cobined)
 bookcompiled = re.compile(bookTextREGEX)
@@ -239,18 +279,31 @@ def get_var_name_and_indexes(variable):
 # the mathermatical operators are +, -, *, /, %, **, //, and access boolian operators and their nots such as ==, !=, >, <, >=, <=, and in, not in
 def math_exec(operator, value1, value2):
     if operator == "+":
-        valtype = type(value1)
-        return value1 + valtype(value2)
+        if type(value1) == str or type(value2) == str:
+            return str(value1)+str(value2)
+        return value1+value2
     elif operator == "-":
-        return value1 - value2
+        output = value1-value2
+        if type(output) == float:
+            output = number(output)
+        return output
     elif operator == "*":
-        return value1 * value2
+        output = value1*value2
+        if type(output) == float:
+            output = number(output)
+        return output
     elif operator == "/":
-        return value1 / value2
+        output = value1 / value2
+        if type(output) == float:
+            return number(output)
+        return output
     elif operator == "%":
         return value1 % value2
     elif operator == "^":
-        return value1 ** value2
+        output = value1 ** value2
+        if type(output) == float:
+            return number(output)
+        return output
     elif operator == "$":
         return value1 // value2
     elif operator == "==":
@@ -572,9 +625,9 @@ def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]: # Aexec stands for
     string = string.strip()
     if (eval and cobinedcompiled.fullmatch(string)) or (not eval and cobinedevalcompiled.fullmatch(string)):
         return val_Aexec(string, eval, vars=vars)
-    elif bracketsTest.fullmatch(string) and string.startswith("(") and string.endswith(")"):
+    elif bracketsTest.fullmatch(string):
         try:
-          return Aexec(string[1:-1], eval, vars=vars)
+            return Aexec(string[1:-1], eval, vars=vars)
         except SyntaxError:
           pass
     processes = [" and ", " or ", " not in ", " in ", "<=", ">=", "<-", ">-", "!=", "==", "-", "+", "^","*","$", '%',"/"]
