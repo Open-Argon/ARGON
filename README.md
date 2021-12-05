@@ -1,2 +1,88 @@
-# Argon ⚛🧪
- an open source programming language named off the noble gas Argon (hardly has any useful characteristics, like this language lol)
+<div align="center">
+<p>
+    <img width="80" src="https://raw.githubusercontent.com/Ugric/Argon/main/logo.png">
+</p>
+<h1>The Argon Programming Language</h1>
+</div>
+
+## Key Features of Argon
+
+- easy to learn for new developers
+- boolean renamed from true and false to yes and no
+- the syntax is very similar to python and javascript
+- no requirement to know the difference between floats and ints
+
+## Examples
+
+Hello world:
+```javascript
+log('hello, world!')
+```
+Inputs:
+```javascript
+input('name: ')
+```
+Variables:
+```javascript
+const myConstant = "this can't change!"
+var myVariable = "this can change!"
+myOtherVariable = "this can also change!"
+```
+Addition:
+```javascript
+const word1 = 'hello'
+const word2 = 'world'
+log(word1 + ' ' + word2)
+```
+If Statements:
+```javascript
+const password = 'password123'
+const guess = input('password: ')
+if (password == guess) [
+   log('correct') 
+] else [
+   log('incorrect')
+]
+```
+While Loops:
+```javascript
+var i = 0
+while (i <- 100) [
+   log(i)
+   i++
+]
+```
+
+Logic (Boolean):
+```javascript
+log('true is now', yes)
+log('false is now', no)
+log('none is now', unknown)
+
+while (yes) [
+   log('Argon is EPIC!')
+]
+```
+
+Items (Lists or Arrays):
+```javascript
+[1, 2, 3]
+['john', 'joe', 'bob']
+```
+
+Books (Dictionaries or Objects):
+```javascript
+{'name': 'bob', 'age': 34, 'hobbies': ['Programming in Argon!', 'Playing video games!']}
+```
+
+## How do I run Argon?
+
+Setup:
+- download the Argon executable for [Windows](https://www.youtube.com/watch?v=gmB8ea8uLsM) or [MacOS](https://github.com/Ugric/Argon/raw/main/dist/argon)
+
+Run a file:
+- make a file with the extention as `.ar` and put your Argon code inside that file
+- call the Argon executable with a parameter with the directory to your .ar file, (e.g. `$ argon example.ar`)
+
+Run the shell:
+- run the Argon executable without any parameters, (e.g. `$ argon`)
