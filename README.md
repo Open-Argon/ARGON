@@ -8,6 +8,7 @@
 ## Key Features of Argon
 
 - easy to learn for new developers
+- automatic type changing (e.g. INPUT: `'age: ' + 34` OUTPUT: `'age: 34'`)
 - boolean renamed from true and false to yes and no
 - the syntax is very similar to python and javascript
 - no requirement to know the difference between floats and ints
