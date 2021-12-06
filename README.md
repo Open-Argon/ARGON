@@ -67,12 +67,24 @@ while (yes) [
 Items (Lists or Arrays):
 ```javascript
 [1, 2, 3]
-['john', 'joe', 'bob']
+const names = ['john', 'joe', 'bob']
+
+log(names[2])
 ```
 
 Books (Dictionaries or Objects):
 ```javascript
-{'name': 'bob', 'age': 34, 'hobbies': ['Programming in Argon!', 'Playing video games!']}
+const user = {'name': 'bob', 'age': 34, 'hobbies': ['Programming in Argon!', 'Playing video games!']}
+
+log(user['name'])
+```
+
+Subs (Functions):
+```javascript
+sub hello(username) [
+  return 'hello, ' + username + ', how are you?'
+]
+log(hello('bob'))
 ```
 
 ## How do I run Argon?

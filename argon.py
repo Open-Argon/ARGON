@@ -46,7 +46,7 @@ def colourify(colour, text):
         return "\033[95m" + text + "\033[0m"
 
 # make a function that takes in a param of any type and returns it as a number
-def number(value: Any) -> (int | float):
+def number(value: Any):
     try:
         inted = int(value)
         floated = float(value)
@@ -170,9 +170,12 @@ vars = {
     'JSONstringify':{'type': 'init', 'py': json.dumps},
     'pi': {'type': 'init', 'value': math.pi},
     'e': {'type': 'init', 'value': math.e},
-    'sin': {'type': 'init', 'py': math.sin},
-    'cos': {'type': 'init', 'py': math.cos},
-    'tan': {'type': 'init', 'py': math.tan},
+    'sin': {'type': 'init', 'py': lambda x: math.sin(math.radians(x))},
+    'cos': {'type': 'init', 'py': lambda x: math.cos(math.radians(x))},
+    'tan': {'type': 'init', 'py': lambda x: math.tan(math.radians(x))},
+    'rsin':{'type': 'init', 'py': math.sin},
+    'rcos': {'type': 'init', 'py': math.cos},
+    'rtan': {'type': 'init', 'py': math.tan},
     'asin': {'type': 'init', 'py': math.asin},
     'acos': {'type': 'init', 'py': math.acos},
     'atan': {'type': 'init', 'py': math.atan},
@@ -183,7 +186,6 @@ vars = {
     'asinh': {'type': 'init', 'py': math.asinh},
     'acosh': {'type': 'init', 'py': math.acosh},
     'atanh': {'type': 'init', 'py': math.atanh},
-    'radians': {'type': 'init', 'py': math.radians},
     'exp': {'type': 'init', 'py': math.exp},
     'logarithm': {'type': 'init', 'py': math.log},
     'logarithm10': {'type': 'init', 'py': math.log10},
@@ -349,7 +351,7 @@ def runSub(subname, args):
                 f"{vars[subname]['f']['prams'][i]} is an initialized variable / function")
         kwargs[vars[subname]['f']['prams'][i]] = {
             'type': 'var', 'value': args[i]}
-    run(vars[subname]['f']['code'], kwargs)
+    return run(vars[subname]['f']['code'], kwargs, True)[1]
 
 # value Argon executer takes in a string and runs it through the parser
 def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]: # returns a tuple of a bool and a value
@@ -672,7 +674,7 @@ runnerREGEX = re.compile(
     r"( *)(while( +)\(.*\)|if( +)\(.*\)|(sub)( +)([a-zA-Z]+)\((.*)\)( +))( *)\[( *)")
 
 
-def run(code: list, vars=vars):
+def run(code: list, vars=vars, isSub = False):
     Runnertype = ""
     Runnercheck = None
     inRunner = 0
@@ -691,7 +693,9 @@ def run(code: list, vars=vars):
                     subdata = "".join(line.strip().split(' ')[1:]).split('(')
                     subname = subdata[0]
                     prams = '('.join(subdata[1:]).split(')')[0].split(',')
-                    print(subname, prams)
+                    for i in range(len(prams)):
+                      if prams[i] == '':
+                        prams.pop(i)
                 else:
                     Runnercheck = ''.join(line.strip().split(' ')[1:])[
                         :-1].strip()[1:-1]
@@ -735,7 +739,10 @@ def run(code: list, vars=vars):
                 else:
                     Runnercode.append(line)
         elif line != "":
+            if isSub and line.strip().startswith('return'):
+              return Aexec(line.strip()[6:], vars=vars, eval=True)
             Aexec(line, vars=vars)
+    return False, None
 
 
 if __name__ == "__main__":

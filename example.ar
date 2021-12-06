@@ -7,7 +7,7 @@ var diameter = 0
 
 var i = 0
 while (i <- sides/2) [
-    diameter = diameter + sin(radians(angles*i))
+    diameter = diameter + sin(angles*i)
     i++
 ]
 log('pi is',sides/diameter)
