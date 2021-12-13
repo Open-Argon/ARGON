@@ -1,19 +1,28 @@
-log('welcome to PI calculator!')
+const x = 10
+const y = 10
+var stopped = ''
 
-const sides = whole(input('how many sides will the circle have? '))
-const timing = time()
-var lasttime = timing
-const angles = 360 / sides
-var diameter = 0
-
-var i = 0
-while (i <- sides) [
-    diameter = diameter + sin(angles*i)
-    if (time() - lasttime >- 1) [
-        log((time() - timing) / i)
-        lasttime = time()
+sub genGrid(x, y) [
+  const board = []
+  var i = 0
+  while (i<-x) [
+    append(board, [])
+    var j = 0
+    while (j<-y) [
+      append(board[i], 'O')
+      j++
     ]
     i++
+  ]
+  return board
 ]
-log('pi is', sides/diameter)
-log('completed in', time()-timing, 'seconds')
+
+sub showBoard(board, x, y) [
+  var i = 0
+  while (i<-x) [
+    log(join(' ', board[i]))
+    i++
+  ]
+]
+
+showBoard(genGrid(x, y), x, y)
