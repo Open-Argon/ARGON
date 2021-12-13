@@ -1,0 +1,126 @@
+#   ___   ___  _                                                  
+#  / _ \ /___\/ \                                                 
+# / /_\///  //  /                                                 
+#/ /_\\/ \_//\_/                                                  
+#\____/\___/\/                                                    
+#                                                                 
+#   ___         __    __ _ _ _ _                     ___      _ _ 
+#  / __\_   _  / / /\ \ (_) | (_) __ _ _ __ ___     / __\ ___| | |
+# /__\// | | | \ \/  \/ / | | | |/ _` | '_ ` _ \   /__\/// _ \ | |
+#/ \/  \ |_| |  \  /\  /| | | | | (_| | | | | | | / \/  \  __/ | |
+#\_____/\__, |   \/  \/ |_|_|_|_|\__,_|_| |_| |_| \_____/\___|_|_|
+#       |___/                                                     
+
+const playerStart = {'x': 0, 'y': 5}
+const cpuStart = {'x': 5, 'y': 0}
+const playerPos = {'x': 0, 'y': 5}
+const cpuPos = {'x': 5, 'y': 0}
+
+const dice = ['f2', 'f1', 'b2', 'b1', 'l1', 'r1']
+
+const boardSize = {'x': 6, 'y': 6}
+
+sub displayBoard() [
+  var i = 0
+  while (i<-boardSize['y']) [
+    var j = 0
+    while (j<-boardSize['x']) [
+      if ((i==playerPos['y']) && (j==playerPos['x'])) [
+        logF('██')
+      ] else [
+        if (i==cpuPos['y'] && j==cpuPos['x']) [
+          logF('▒▒')
+        ] else [
+          logF('░░')
+        ]
+      ]
+      j++
+    ]
+    log()
+    i++
+  ]
+]
+
+sub rollDice() [
+  var roll = dice[floor((random())*(length(dice)))]
+  var move
+  if (roll == 'f1') [
+    move = {'x': 0, 'y': -1}
+  ] else [
+    if (roll == 'f2') [
+      move = {'x': 0, 'y': -2}
+    ] else [
+      if (roll == 'b1') [
+        move = {'x': 0, 'y': 1}
+      ] else [
+        if (roll == 'b2') [
+          move = {'x': 0, 'y': 2}
+        ] else [
+          if (roll == 'l1') [
+            move = {'x': -1, 'y': 0}
+          ] else [
+            if (roll == 'r1') [
+              move = {'x': 1, 'y': 0}
+            ]
+          ]
+        ]
+      ]
+    ]
+  ]
+  return [roll, move]
+]
+
+var turn = logic(round(random()))
+var gameOver = no
+var win = no
+
+while (gameOver == no) [
+  displayBoard()
+  if (turn==yes) [
+    log('Player turn')
+    input('Press enter to roll')
+    var roll = rollDice()
+    log('you rolled a '+roll[0])
+    var xchange = (playerPos['x'])+(roll[1]['x'])
+    var ychange = (playerPos['y'])+(roll[1]['y'])
+    var canmove = (xchange <- boardSize['x']) && (ychange <- boardSize['y']) && (xchange >= 0) && (ychange >= 0)
+    if (canmove) [
+      playerPos['x'] = (playerPos['x'])+(roll[1]['x'])
+      playerPos['y'] = (playerPos['y'])+(roll[1]['y'])
+    ] else [
+      log('You did not move')
+    ]
+    
+    if (playerPos == cpuStart) [
+      gameOver = yes
+      win = yes
+    ]
+  ] else [
+    log('CPU turn')
+    snooze(.5)
+    var roll = rollDice()
+    log('CPU rolled a '+roll[0])
+    var xchange = (cpuPos['x'])-(roll[1]['x'])
+    var ychange = (cpuPos['y'])-(roll[1]['y'])
+    var canmove = (xchange <- boardSize['x']) && (ychange <- boardSize['y']) && (xchange >= 0) && (ychange >= 0)
+    if (canmove) [
+      cpuPos['x'] = cpuPos['x'] - roll[1]['x']
+      cpuPos['y'] = cpuPos['y'] - roll[1]['y']
+    ] else [
+      log('CPU did not move')
+    ]
+    if (cpuPos == playerStart) [
+      gameOver = yes
+      win = no
+    ]
+  ]
+  snooze(.5)
+  turn = turn == no
+]
+
+displayBoard()
+if (win) [
+  log('You win!')
+] else [
+  log('You lose!')
+]

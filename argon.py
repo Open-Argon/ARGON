@@ -95,7 +95,6 @@ def logSC(*args):
     for i in range(len(args)):
         newargs.append(valToArgonString(args[i], speach=True))
     print(*newargs)
-
 def logF(*args):
     newargs = []
     for i in range(len(args)):
@@ -168,6 +167,8 @@ vars = {
     'lower': {'type': 'init', 'py': lambda x: x.lower()},
     'append': {'type': 'init', 'py': lambda list, value: list.append(value)},
     'insert': {'type': 'init', 'py': lambda list, to, value: list.insert(to,value)},
+    'extend': {'type': 'init', 'py': lambda list, values: list.extend(values)},
+    'pop': {'type': 'init', 'py': lambda list, i=-1: list.pop(i)},
     'number': {'type': 'init', 'py': number},
     'char': {'type': 'init', 'py': chr},
     'ord': {'type': 'init', 'py': ord},
@@ -239,18 +240,17 @@ vars = {
 
 stringTextREGEX = r"( *)((((\')((\\([a-z\\\"\']))|[^\\\'])*(\'))|((\")((\\([a-z\\\"\']))|[^\\\"])*(\"))))( *)"
 numberTextREGEX = r"( *)(\-)?([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
-varNoSpace = r'([a-z]|[A-Z])([a-zA-Z0-9]*)((\[.*\])*)'
+varNoSpace = r'[a-zA-Z_][a-zA-Z0-9_]*(\[([^\[\]]|\[.*\])*\])*'
 varTextREGEX = fr"( *){varNoSpace}( *)"
 bookTextREGEX = r"( *)\{((( *).+( *):( *).+( *))(( *)\,( *).+( *):( *).+( *))*|)?\}( *)"
 bracketsTextREGEX = r"( *)\(.*\)( *)"
 commentTextREGEX = r'( *)\#(.*)( *)'
-functionTextREGEX = r"( *)(([a-z]|[A-Z])([a-zA-Z0-9]*))\(.*\)( *)"
+functionTextREGEX = r"( *)(([a-zA-Z_])([a-zA-Z0-9_]*))\(.*\)( *)"
 varAdd1 = fr"( *){varNoSpace}\+\+( *)"
 switchTextREGEX = r"( *).+\?.+\:.+( *)"
 itemsTextREGEX = r"( *)\[.*\]( *)"
 remTextREGEX = fr"( *)del( +)({varTextREGEX})( *)"
-appendTextREGEX = fr"( *)append( +)({varTextREGEX})( +).+( *)"
-cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}|{switchTextREGEX}|{itemsTextREGEX}|{commentTextREGEX}|{bookTextREGEX}|{varAdd1}"
+cobined = fr"{stringTextREGEX}|{numberTextREGEX}|{varTextREGEX}|{functionTextREGEX}|{switchTextREGEX}|{itemsTextREGEX}|{commentTextREGEX}|{bookTextREGEX}|{varAdd1}|{bracketsTextREGEX}"
 commentTest = re.compile(commentTextREGEX)
 cobinedcompiled = re.compile(cobined)
 bookcompiled = re.compile(bookTextREGEX)
@@ -320,7 +320,7 @@ def get_var_name_and_indexes(variable):
 def math_exec(operator, value1, value2):
     if operator == "+":
         if type(value1) == str or type(value2) == str:
-            return str(value1)+str(value2)
+            return valToArgonString(value1, colour=False)+valToArgonString(value2, colour=False)
         return value1+value2
     elif operator == "-":
         output = value1-value2
@@ -370,9 +370,9 @@ def math_exec(operator, value1, value2):
         return value1 in value2
     elif operator == "!@":
         return value1 not in value2
-    elif operator == "||":
+    elif operator in ["||", ' or ']:
         return value1 or value2
-    elif operator == "&&":
+    elif operator in ["&&", ' and ']:
         return value1 and value2
     else:
         raise SyntaxError(f"invalid syntax")
@@ -663,48 +663,29 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]: # returns a tu
 # bodmas stands for brackets, order of operations, division, multiplication, addition, subtraction
 def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]: # Aexec stands for Argon Execution
     string = string.strip()
-    print(string)
-    if (eval and cobinedcompiled.fullmatch(string)) or (not eval and cobinedevalcompiled.fullmatch(string)):
-        return val_Aexec(string, eval, vars=vars)
-    elif bracketsTest.fullmatch(string):
-        print(string)
+    if bracketsTest.fullmatch(string):
         try:
-            return Aexec(string[1:-1], eval, vars=vars)
+            return Aexec(string[1:-1], True, vars=vars)
         except SyntaxError:
           pass
-    processes = ["&&", "||", "!@", "@", "<=", ">=", "<-", ">-", "!=", "==", "-", "+", "^","*","$", '%',"/"]
-    loopoutput = []
-    process = []
+    elif (eval and cobinedcompiled.fullmatch(string)) or (not eval and cobinedevalcompiled.fullmatch(string)):
+        return val_Aexec(string, eval, vars=vars)
+    processes = ["&&", "||", "!@", "@", "<=", ">=", "<-", ">-", "!=", "==", "/", "%", "$","*","^", '+',"-"]
     didprocess = False
-    for i in range(len(string)):
-      process.append(string[i])
-      for x in range(len(processes)):
-        joined = ''.join(process)
-        if joined.endswith(processes[x]):
-          removed = joined[:-len(processes[x])].strip()
-          if cobinedevalcompiled.fullmatch(removed):
-              loopoutput.append(removed)
-              loopoutput.append(processes[x])
-              process = []
-          elif removed.startswith("(") and removed.endswith(")"):
-              loopoutput.append(removed)
-              loopoutput.append(processes[x])
-              process = []
-    if len(process)> 0:
-      loopoutput.append("".join(process))
-      process = []
-    didprocess = False
-    output = None
     for x in range(len(processes)):
-      breaks = False
-      for i in range(1,len(loopoutput),2):
-        if processes[x] == loopoutput[i]:
-            didprocess = True
-            output = (math_exec(loopoutput[i], Aexec(''.join(loopoutput[:i]))[1],  Aexec(''.join(loopoutput[i+1:]))[1]))
-            breaks = True
-            break
-      if breaks:
-        break
+        currentprocesser = processes[x]
+        currentsplit = string.split(currentprocesser)
+        if len(currentsplit) > 1:
+            removed = currentsplit[0].strip()
+            after = currentprocesser.join(currentsplit[1:]).strip()
+            try:
+                val1 = Aexec(removed, True, vars=vars)[1]
+                val2 = Aexec(after, True, vars=vars)[1]
+                didprocess = True
+                output = math_exec(currentprocesser, val1, val2)
+                break
+            except SyntaxError:
+                pass
     if not didprocess:
         raise SyntaxError(f"invalid syntax")
     return didprocess, output
