@@ -1,3 +1,4 @@
+from os import extsep
 import re
 from typing import Any, Tuple
 import sys
@@ -5,6 +6,7 @@ import time
 import math
 import random
 import json
+import pathlib
 
 version = "ARGON Beta 2.2.1"
 
@@ -625,9 +627,11 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]: # returns a tu
 # bodmas stands for brackets, order of operations, division, multiplication, addition, subtraction
 def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]: # Aexec stands for Argon Execution
     string = string.strip()
+    print(string)
     if (eval and cobinedcompiled.fullmatch(string)) or (not eval and cobinedevalcompiled.fullmatch(string)):
         return val_Aexec(string, eval, vars=vars)
     elif bracketsTest.fullmatch(string):
+        print(string)
         try:
             return Aexec(string[1:-1], eval, vars=vars)
         except SyntaxError:
@@ -747,7 +751,11 @@ def run(code: list, vars=vars, isSub = False):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        code = open(sys.argv[1], "r").read().split("\n")
+        filename = sys.argv[1]
+        split = pathlib.Path(filename)
+        if len(split.suffix) == 0:
+            filename += ".ar"
+        code = open(filename, "r").read().split("\n")
         run(code)
     else:
         print(boxify(

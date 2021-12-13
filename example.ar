@@ -1,14 +1,19 @@
 log('welcome to PI calculator!')
 
-const sides = whole(input('how many sides will the circle have? (more sides = more acurate and longer loading) '))
+const sides = whole(input('how many sides will the circle have? '))
 const timing = time()
+var lasttime = timing
 const angles = 360 / sides
 var diameter = 0
 
 var i = 0
-while (i <- sides/2) [
+while (i <- sides) [
     diameter = diameter + sin(angles*i)
+    if (time() - lasttime >- 1) [
+        log((time() - timing) / i)
+        lasttime = time()
+    ]
     i++
 ]
-log('pi is',sides/diameter)
+log('pi is', sides/diameter)
 log('completed in', time()-timing, 'seconds')
