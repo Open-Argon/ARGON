@@ -5,6 +5,7 @@ import time
 import math
 import random
 import json
+import turtle
 
 version = "ARGON Beta 2.2.1"
 
@@ -58,13 +59,13 @@ def number(value: Any):
 
 def Atype(value):
     return {
-        int: [number,"number"],
-        float: [number,"number"],
-        str: [valToArgonString,"string"],
-        bool: [bool,"logic"],
-        list: [list,"items"],
-        tuple: [list,"items"],
-        dict: [dict,"book"],
+        int: "number",
+        float: "number",
+        str: "string",
+        bool: "logic",
+        list: "items",
+        tuple: "items",
+        dict: "book",
     }[type(value)]
 
 def code_Aexec(string):
@@ -73,6 +74,33 @@ def code_Aexec(string):
 
 def code_Aeval(string):
     return Aexec(string, True)[1]
+
+def logSF(*args):
+    newargs = []
+    for i in range(len(args)):
+        newargs.append(valToArgonString(args[i], speach=True, colour=False))
+    print(*newargs, end='')
+def logSCF(*args):
+    newargs = []
+    for i in range(len(args)):
+        newargs.append(valToArgonString(args[i], speach=True))
+    print(*newargs, end='')
+def logS(*args):
+    newargs = []
+    for i in range(len(args)):
+        newargs.append(valToArgonString(args[i], speach=True, colour=False))
+    print(*newargs)
+def logSC(*args):
+    newargs = []
+    for i in range(len(args)):
+        newargs.append(valToArgonString(args[i], speach=True))
+    print(*newargs)
+
+def logF(*args):
+    newargs = []
+    for i in range(len(args)):
+        newargs.append(valToArgonString(args[i]))
+    print(*newargs, end='')
 
 def log(*args):
     newargs = []
@@ -125,12 +153,21 @@ def Arange(start, stop=None, step=1):
 
 vars = {
     'log': {'type': 'init', 'py': log},
+    'logF': {'type': 'init', 'py': logF},
+    'logS': {'type': 'init', 'py': logS},
+    'logSC': {'type': 'init', 'py': logSC},
+    'logSF': {'type': 'init', 'py': logSF},
+    'logSCF': {'type': 'init', 'py': logSCF},
     'input': {'type': 'init', 'py': input},
     'PYeval': {'type': 'init', 'py': eval},
     'PYexec': {'type': 'init', 'py': exec},
     'abs': {'type': 'init', 'py': abs},
     'round': {'type': 'init', 'py': round},
     'length': {'type': 'init', 'py': len},
+    'upper': {'type': 'init', 'py': lambda x: x.upper()},
+    'lower': {'type': 'init', 'py': lambda x: x.lower()},
+    'append': {'type': 'init', 'py': lambda list, value: list.append(value)},
+    'insert': {'type': 'init', 'py': lambda list, to, value: list.insert(to,value)},
     'number': {'type': 'init', 'py': number},
     'char': {'type': 'init', 'py': chr},
     'ord': {'type': 'init', 'py': ord},
@@ -193,6 +230,7 @@ vars = {
     'sqrt': {'type': 'init', 'py': math.sqrt},
     'ceil': {'type': 'init', 'py': math.ceil},
     'floor': {'type': 'init', 'py': math.floor},
+    'round':  {'type': 'init', 'py': round},
     'pow': {'type': 'init', 'py': math.pow},
     'hypot': {'type': 'init', 'py': math.hypot},
     'degrees': {'type': 'init', 'py': math.degrees},
@@ -203,7 +241,7 @@ stringTextREGEX = r"( *)((((\')((\\([a-z\\\"\']))|[^\\\'])*(\'))|((\")((\\([a-z\
 numberTextREGEX = r"( *)(\-)?([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
 varNoSpace = r'([a-z]|[A-Z])([a-zA-Z0-9]*)((\[.*\])*)'
 varTextREGEX = fr"( *){varNoSpace}( *)"
-bookTextREGEX = r"( *)\{(( *).+( *):( *).+( *))(( *)\,( *).+( *):( *).+( *))*\}( *)"
+bookTextREGEX = r"( *)\{((( *).+( *):( *).+( *))(( *)\,( *).+( *):( *).+( *))*|)?\}( *)"
 bracketsTextREGEX = r"( *)\(.*\)( *)"
 commentTextREGEX = r'( *)\#(.*)( *)'
 functionTextREGEX = r"( *)(([a-z]|[A-Z])([a-zA-Z0-9]*))\(.*\)( *)"
@@ -328,13 +366,13 @@ def math_exec(operator, value1, value2):
         return value1 >= value2
     elif operator == "<=":
         return value1 <= value2
-    elif operator == " in ":
+    elif operator == "@":
         return value1 in value2
-    elif operator == " not in ":
+    elif operator == "!@":
         return value1 not in value2
-    elif operator == " or ":
+    elif operator == "||":
         return value1 or value2
-    elif operator == " and ":
+    elif operator == "&&":
         return value1 and value2
     else:
         raise SyntaxError(f"invalid syntax")
@@ -632,7 +670,7 @@ def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]: # Aexec stands for
             return Aexec(string[1:-1], eval, vars=vars)
         except SyntaxError:
           pass
-    processes = [" and ", " or ", " not in ", " in ", "<=", ">=", "<-", ">-", "!=", "==", "-", "+", "^","*","$", '%',"/"]
+    processes = ["&&", "||", "!@", "@", "<=", ">=", "<-", ">-", "!=", "==", "-", "+", "^","*","$", '%',"/"]
     loopoutput = []
     process = []
     didprocess = False
