@@ -18,29 +18,29 @@
 Hello world:
 
 ```javascript
-log("hello, world!");
+log("hello, world!")
 ```
 
 Inputs:
 
 ```javascript
-input("name: ");
+input("name: ")
 ```
 
 Variables:
 
 ```javascript
-const myConstant = "this can't change!";
-var myVariable = "this can change!";
-myOtherVariable = "this can also change!";
+const myConstant = "this can't change!"
+var myVariable = "this can change!"
+myOtherVariable = "this can also change!"
 ```
 
 Addition:
 
 ```javascript
-const word1 = "hello";
-const word2 = "world";
-log(word1 + " " + word2);
+const word1 = "hello"
+const word2 = "world"
+log(word1 + " " + word2)
 ```
 
 If Statements:
@@ -68,32 +68,28 @@ while (i <- 100) [
 Logic (Boolean):
 
 ```javascript
-log("true is now", yes);
-log("false is now", no);
-log("none is now", unknown);
+log("true is now", yes)
+log("false is now", no)
+log("none is now", unknown)
 
-while (yes) [log("Argon is EPIC!")];
+while (yes) [log("Argon is EPIC!")]
 ```
 
 Items (Lists or Arrays):
 
 ```javascript
-[1, 2, 3];
-const names = ["john", "joe", "bob"];
+[1, 2, 3]
+const names = ["john", "joe", "bob"]
 
-log(names[2]);
+log(names[2])
 ```
 
 Books (Dictionaries or Objects):
 
 ```javascript
-const user = {
-  name: "bob",
-  age: 34,
-  hobbies: ["Programming in Argon!", "Playing video games!"],
-};
+const user = {'name': "bob", 'age': 34, 'hobbies': ["Programming in Argon!", "Playing video games!"]}
 
-log(user["name"]);
+log(user["name"])
 ```
 
 Subs (Functions):
