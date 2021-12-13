@@ -72,7 +72,9 @@ log("true is now", yes)
 log("false is now", no)
 log("none is now", unknown)
 
-while (yes) [log("Argon is EPIC!")]
+while (yes) [
+   log("Argon is EPIC!")
+]
 ```
 
 Items (Lists or Arrays):
