@@ -7,7 +7,7 @@ import random
 import json
 import pathlib
 
-version = "ARGON Beta 2.2.1"
+version = "ARGON Beta 2.4.2"
 
 # make a function that takes in 2 params, colour and text and outputs a coloured text
 def colourify(colour, text):
