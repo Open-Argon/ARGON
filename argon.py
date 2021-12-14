@@ -107,6 +107,9 @@ def log(*args):
         newargs.append(valToArgonString(args[i]))
     print(*newargs)
 
+def substring(string, start=None, end=None, step=None):
+  return string[start:end:step]
+
 
 def boxify(text, length=0, align="left"):
     if align not in ['left', 'right', 'center']:
@@ -163,6 +166,7 @@ vars = {
     'abs': {'type': 'init', 'py': abs},
     'round': {'type': 'init', 'py': round},
     'length': {'type': 'init', 'py': len},
+    'sub': {'type': 'init', 'py': substring},
     'upper': {'type': 'init', 'py': lambda x: x.upper()},
     'lower': {'type': 'init', 'py': lambda x: x.lower()},
     'append': {'type': 'init', 'py': lambda list, value: list.append(value)},
@@ -189,6 +193,7 @@ vars = {
     'boxify': {'type': 'init', 'py': boxify},
     'whole': {'type':'init', 'py': int},
     'book': {'type':'init', 'py': dict},
+    'items': {'type': 'init', 'py': list},
     'exec': {"type": "init", "py": code_Aexec},
     'eval': {"type": "init", "py": code_Aeval},
     'range': {'type': 'init', 'py': Arange},
@@ -465,7 +470,7 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]: # returns a tu
                 val = vars[varname]['value']
                 for i in range(len(bracketslist)-1):
                     val = val[bracketslist[i]]
-                val.pop(bracketslist[-1])
+                del val[bracketslist[-1]]
             else:
                 del vars[varname]
         else:
@@ -670,7 +675,7 @@ def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]: # Aexec stands for
           pass
     elif (eval and cobinedcompiled.fullmatch(string)) or (not eval and cobinedevalcompiled.fullmatch(string)):
         return val_Aexec(string, eval, vars=vars)
-    processes = ["&&", "||", "!@", "@", "<=", ">=", "<-", ">-", "!=", "==", "/", "%", "$","*","^", '+',"-"]
+    processes = ["&&", ' and ', "||", ' or ', "!@", "@", "<=", ">=", "<-", ">-", "!=", "==", "/", "%", "$","*","^", '+',"-"]
     didprocess = False
     for x in range(len(processes)):
         currentprocesser = processes[x]

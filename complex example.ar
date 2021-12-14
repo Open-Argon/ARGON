@@ -21,24 +21,26 @@ const dice = ['f2', 'f1', 'b2', 'b1', 'l1', 'r1']
 const boardSize = {'x': 6, 'y': 6}
 
 sub displayBoard() [
+  var output = []
   var i = 0
   while (i<-boardSize['y']) [
     var j = 0
     while (j<-boardSize['x']) [
       if ((i==playerPos['y']) && (j==playerPos['x'])) [
-        logF('██')
+        append(output,'██')
       ] else [
-        if (i==cpuPos['y'] && j==cpuPos['x']) [
-          logF('▒▒')
+        if ((i==cpuPos['y']) && (j==cpuPos['x'])) [
+          append(output,'▒▒')
         ] else [
-          logF('░░')
+          append(output,'░░')
         ]
       ]
       j++
     ]
-    log()
+    append(output, '\n')
     i++
   ]
+  log(join('', output))
 ]
 
 sub rollDice() [
@@ -76,7 +78,7 @@ var win = no
 
 while (gameOver == no) [
   displayBoard()
-  if (turn==yes) [
+  if (turn) [
     log('Player turn')
     input('Press enter to roll')
     var roll = rollDice()
