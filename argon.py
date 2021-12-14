@@ -676,16 +676,17 @@ def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]: # Aexec stands for
         currentprocesser = processes[x]
         currentsplit = string.split(currentprocesser)
         if len(currentsplit) > 1:
-            removed = currentsplit[0].strip()
-            after = currentprocesser.join(currentsplit[1:]).strip()
-            try:
-                val1 = Aexec(removed, True, vars=vars)[1]
-                val2 = Aexec(after, True, vars=vars)[1]
-                didprocess = True
-                output = math_exec(currentprocesser, val1, val2)
-                break
-            except SyntaxError:
-                pass
+            for i in range(len(currentsplit)-1):
+                removed = currentprocesser.join(currentsplit[:i+1]).strip()
+                after = currentprocesser.join(currentsplit[i+1:]).strip()
+                try:
+                    val1 = Aexec(removed, True, vars=vars)[1]
+                    val2 = Aexec(after, True, vars=vars)[1]
+                    didprocess = True
+                    output = math_exec(currentprocesser, val1, val2)
+                    break
+                except SyntaxError:
+                    pass
     if not didprocess:
         raise SyntaxError(f"invalid syntax")
     return didprocess, output
