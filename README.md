@@ -12,6 +12,7 @@
 - boolean renamed from true and false to yes and no
 - the syntax is very similar to python and javascript
 - no floats and ints, only numbers
+- **New Feature!** easier operators, e.g. `5^2` can now be `5 to the power of 2`
 
 ## Examples
 
@@ -90,7 +91,6 @@ Books (Dictionaries or Objects):
 
 ```javascript
 const user = {'name': "bob", 'age': 34, 'hobbies': ["Programming in Argon!", "Playing video games!"]}
-
 log(user["name"])
 ```
 
@@ -101,6 +101,72 @@ sub hello(username) [
   return 'hello, ' + username + ', how are you?'
 ]
 log(hello('bob'))
+```
+
+Easy to Learn Operators:
+```javascript
+log('addtion:')
+log(1 + 2)
+log(1 add 2)
+log(1 plus 2)
+log()
+log('subtraction:')
+log(1 - 2)
+log(1 subtract 2)
+log(1 minus 2)
+log()
+log('multiplication:')
+log(1 * 2)
+log(1 multiplied by 2)
+log(1 times 2)
+log(1 x 2)
+log()
+log('division:')
+log(1 / 2)
+log(1 divided by 2)
+log(1 over 2)
+log()
+log('modulo:')
+log(1 % 2)
+log(1 modulo 2)
+log(1 mod 2)
+log()
+log('power:')
+log(1 ^ 2)
+log(1 to the power of 2)
+log(1 ** 2)
+log()
+log('equality:')
+log(1 == 2)
+log(1 is 2)
+log()
+log('inequality:')
+log(1 != 2)
+log(1 is not 2)
+log()
+log('greater than:')
+log(1 > 2)
+log(1 is greater than 2)
+log()
+log('less than:')
+log(1 < 2)
+log(1 is less than 2)
+log()
+log('greater than or equal to:')
+log(1 >= 2)
+log(1 is greater than or equal to 2)
+log()
+log('less than or equal to:')
+log(1 <= 2)
+log(1 is less than or equal to 2)
+log()
+log('and:')
+log(1 && 2)
+log(1 and 2)
+log()
+log('or:')
+log(1 || 2)
+log(1 or 2)
 ```
 
 ## How do I run Argon?
