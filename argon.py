@@ -6,7 +6,6 @@ import math
 import random
 import json
 import pathlib
-from periodicTable import *
 
 version = "ARGON Beta 2.4.2"
 
@@ -204,7 +203,6 @@ vars = {
     'logSC': {'type': 'init', 'py': logSC},
     'logSF': {'type': 'init', 'py': logSF},
     'logSCF': {'type': 'init', 'py': logSCF},
-    'periodicTable': {'type': 'init', 'value': periodicTable},
     'input': {'type': 'init', 'py': input},
     'PYeval': {'type': 'init', 'py': eval},
     'PYexec': {'type': 'init', 'py': exec},
