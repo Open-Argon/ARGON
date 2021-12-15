@@ -1,14 +1,9 @@
-log('welcome to PI calculator!')
+const lookFor = 'argon'
+const mySentence = input('Enter a sentence that contains the word \''+lookFor+'\': ')
+const doesContainArgon = 'argon' is in split(' ', lower(mySentence))
 
-const sides = whole(input('how many sides will the circle have? (more sides = more acurate and longer loading) '))
-const timing = time()
-const angles = 360 / sides
-var diameter = 0
-
-var i = 0
-while (i <- sides/2) [
-    diameter = diameter + sin(angles*i)
-    i++
+if (doesContainArgon) [
+    log(doesContainArgon, 'your sentence does contain the word \''+lookFor+'\'!')
+] else [
+    log(doesContainArgon, 'your sentence does not contain the word \''+lookFor+'\'!')
 ]
-log('pi is',sides/diameter)
-log('completed in', time()-timing, 'seconds')
