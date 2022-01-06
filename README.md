@@ -60,7 +60,7 @@ While Loops:
 
 ```javascript
 var i = 0
-while (i <- 100) [
+while (i < 100) [
    log(i)
    i++
 ]

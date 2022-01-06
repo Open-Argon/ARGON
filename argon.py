@@ -1,3 +1,4 @@
+import copy
 import re
 from typing import Any, Tuple
 import sys
@@ -9,44 +10,61 @@ import pathlib
 
 version = "ARGON Beta 2.4.2"
 
+
+# make a function that clears the screen
+
+
+def clear():
+    print("\033c", end='')
+
 # make a function that takes in 2 params, colour and text and outputs a coloured text
 
 
 def colourify(colour, text):
+    text = valToArgonString(text, colour=False, pretty=None)
     if colour == None:
         return text
+    if type(colour) == int:
+        return f"\033[38;5;{colour}m{text}\033[0m"
     elif colour == "red":
-        return "\033[31m" + text + "\033[0m"
+        return f"\033[31m{text}\033[0m"
     elif colour == "green":
-        return "\033[32m" + text + "\033[0m"
+        return f"\033[32m{text}\033[0m"
     elif colour == "yellow":
-        return "\033[33m" + text + "\033[0m"
+        return f"\033[33m{text}\033[0m"
     elif colour == "blue":
-        return "\033[34m" + text + "\033[0m"
+        return f"\033[34m{text}\033[0m"
     elif colour == "purple":
-        return "\033[35m" + text + "\033[0m"
+        return f"\033[35m{text}\033[0m"
     elif colour == "cyan":
-        return "\033[36m" + text + "\033[0m"
+        return f"\033[36m{text}\033[0m"
     elif colour == "white":
-        return "\033[37m" + text + "\033[0m"
+        return f"\033[37m{text}\033[0m"
     elif colour == "black":
-        return "\033[30m" + text + "\033[0m"
+        return f"\033[30m{text}\033[0m"
     elif colour == "grey":
-        return "\033[90m" + text + "\033[0m"
+        return f"\033[90m{text}\033[0m"
     elif colour == "orange":
-        return "\033[33m" + text + "\033[0m"
+        return f"\033[33m{text}\033[0m"
     elif colour == "grey":
-        return "\033[90m" + text + "\033[0m"
+        return f"\033[90m{text}\033[0m"
     elif colour == "lightred":
-        return "\033[91m" + text + "\033[0m"
+        return f"\033[91m{text}\033[0m"
     elif colour == "lightgreen":
-        return "\033[92m" + text + "\033[0m"
+        return f"\033[92m{text}\033[0m"
     elif colour == "lightyellow":
-        return "\033[93m" + text + "\033[0m"
+        return f"\033[93m{text}\033[0m"
     elif colour == "lightblue":
-        return "\033[94m" + text + "\033[0m"
-    elif colour == "lightpurple":
-        return "\033[95m" + text + "\033[0m"
+        return f"\033[94m{text}\033[0m"
+    elif colour == "lightcyan":
+        return f"\033[96m{text}\033[0m"
+    elif colour == "lightwhite":
+        return f"\033[97m{text}\033[0m"
+    elif colour == "pink" or colour == "purple":
+        return f"\033[95m{text}\033[0m"
+    else:
+        raise ValueError("colour must be one of the following: red, green, yellow, blue, purple, cyan, white, black, grey, orange, lightred, lightgreen, lightyellow, lightblue, lightcyan, lightwhite, pink, purple")
+
 
 # make a function that takes in a param of any type and returns it as a number
 
@@ -124,11 +142,22 @@ def log(*args):
     print(*newargs)
 
 
+def rand(seed=None):
+    resetseed = random.random()
+    if seed != None:
+        random.seed(seed)
+    randomresult = random.random()
+    if seed != None:
+        random.seed(resetseed)
+    return randomresult
+
+
 def quadraticFormula(a, b, c):
     if a == 0:
         return None
     else:
         return (-b + math.sqrt(b**2 - 4*a*c)) / (2*a), (-b - math.sqrt(b**2 - 4*a*c)) / (2*a)
+
 
 def substring(string, start=None, end=None, step=None):
     return string[start:end:step]
@@ -138,7 +167,7 @@ def substring(string, start=None, end=None, step=None):
 
 def find(string, array):
     best = None
-    bestscore = 0
+    bestscore = None
     for i in range(len(array)):
         score = 0
         for j in range(len(array[i])):
@@ -146,7 +175,7 @@ def find(string, array):
                 score += 1
             else:
                 score -= 1
-        if score > bestscore and score > len(string)/2:
+        if (bestscore == None or score > bestscore) and score > len(string)/4:
             best = array[i]
             bestscore = score
     return best
@@ -176,9 +205,9 @@ def valToArgonString(value, speach=False, pretty=1, colour=True):
     elif value == False:
         return colourify('red' if colour else None, "no")
     elif type(value) == dict:
-        return "{"+ ", ".join(("\n"+('  '*pretty) if pretty != None and len(list(value)) > 0 else '')+f"{colourify('lightgreen' if colour else None,key) if noSpaceVarTest.fullmatch(str(key)) else valToArgonString(key, speach=True, colour=colour)}: {valToArgonString(value[key], speach=True, pretty=pretty+1 if pretty != None else None, colour=colour)}" for key in value) + ('\n'+('  '*(pretty-1))if pretty != None and len(list(value)) > 0 else '') + "}"
+        return "{" + ", ".join(("\n"+('  '*pretty) if pretty != None and len(list(value)) > 0 else '')+f"{colourify('lightgreen' if colour else None,key) if noSpaceVarTest.fullmatch(str(key)) else valToArgonString(key, speach=True, colour=colour, pretty=pretty+1 if pretty != None else None )}: {valToArgonString(value[key], speach=True, pretty=pretty+1 if pretty != None else None, colour=colour)}" for key in value) + ('\n'+('  '*(pretty-1))if pretty != None and len(list(value)) > 0 else '') + "}"
     elif type(value) in [list, tuple]:
-        return "[" + ", ".join(('\n'+('  '*(pretty-1))if pretty != None and len(list(value)) > 0 else '')+valToArgonString(i, speach=True, pretty=pretty+1 if pretty != None else None, colour=colour) for i in value) + ('\n'+('  '*(pretty-1))if pretty != None and len(list(value)) > 0 else '') + "]"
+        return "[" + ", ".join(('\n'+('  '*(pretty))if pretty != None and len(list(value)) > 0 else '')+valToArgonString(i, speach=True, pretty=pretty+1 if pretty != None else None, colour=colour) for i in value) + ('\n'+('  '*(pretty-1))if pretty != None and len(list(value)) > 0 else '') + "]"
     elif speach == True and type(value) == str:
         return colourify('yellow' if colour else None, f'\'{value}\'')
     return str(value)
@@ -196,7 +225,7 @@ def Arange(start, stop=None, step=1):
         return list(range(start, stop - 1, step))
 
 
-vars = {
+builtins = {
     'log': {'type': 'init', 'py': log},
     'logF': {'type': 'init', 'py': logF},
     'logS': {'type': 'init', 'py': logS},
@@ -205,6 +234,9 @@ vars = {
     'logSCF': {'type': 'init', 'py': logSCF},
     'input': {'type': 'init', 'py': input},
     'PYeval': {'type': 'init', 'py': eval},
+    'colourify': {'type': 'init', 'py': colourify},
+    'colorify': {'type': 'init', 'py': colourify},
+    'clear': {'type': 'init', 'py': clear},
     'PYexec': {'type': 'init', 'py': exec},
     'abs': {'type': 'init', 'py': abs},
     'round': {'type': 'init', 'py': round},
@@ -225,7 +257,7 @@ vars = {
     'binaryToNumber': {'type': 'init', 'py': lambda x: int(x, 2)},
     'hexToNumber': {'type': 'init', 'py': lambda x: int(x, 16)},
     'octalToNumber': {'type': 'init', 'py': lambda x: int(x, 8)},
-    'string': {'type': 'init', 'py': lambda x: valToArgonString(x, colour=False)},
+    'string': {'type': 'init', 'py': lambda x: valToArgonString(x, colour=False, pretty=None)},
     'logic': {'type': 'init', 'py': bool},
     'yes': {'type': 'init', 'value': True},
     'no': {'type': 'init', 'value': False},
@@ -242,8 +274,7 @@ vars = {
     'eval': {"type": "init", "py": code_Aeval},
     'range': {'type': 'init', 'py': Arange},
     'type': {'type': 'init', 'py': Atype},
-    'random': {'type': 'init', 'py': random.random},
-    'setRandomSeed': {'type': 'init', 'py': random.seed},
+    'random': {'type': 'init', 'py': rand},
     'join': {'type': 'init', 'py': lambda by, list: by.join(list)},
     'split': {'type': 'init', 'py': lambda by, string: string.split(by)},
     'replace': {'type': 'init', 'py': lambda from_, to, string: string.replace(from_, to)},
@@ -285,13 +316,16 @@ vars = {
     'hypot': {'type': 'init', 'py': math.hypot},
     'degrees': {'type': 'init', 'py': math.degrees},
     'radians': {'type': 'init', 'py': math.radians},
+    'mol': {'type': 'init', 'value': 6.02214076e+23},
 
 }
+vars = copy.copy(builtins)
 stringTextREGEX = r"( *)((((\')((\\([a-z\\\"\']))|[^\\\'])*(\'))|((\")((\\([a-z\\\"\']))|[^\\\"])*(\"))))( *)"
-numberTextREGEX = r"( *)(\-)?([0-9]*(\.[0-9]*)?(e[0-9]+)?)( *)"
-varNoSpace = r'[a-zA-Z_][a-zA-Z0-9_]*(\[([^\[\]]|\[.*\])*\])*'
+numberTextREGEX = r"( *)(\-)?([0-9]*(\.[0-9]*)?((\+|-|)e[0-9]+)?)( *)"
+varOnly = r'[a-zA-Z_][a-zA-Z0-9_]*'
+varNoSpace = fr'{varOnly}(\[([^\[\]]|\[.*\])*\])*'
 varTextREGEX = fr"( *){varNoSpace}( *)"
-bookTextREGEX = r"( *)\{((( *).+( *):( *).+( *))(( *)\,( *).+( *):( *).+( *))*|)?\}( *)"
+bookTextREGEX = r"( *)\{(((( *).+( *):( *).+( *))|("+varTextREGEX+r"))(( *)\,(( *).+( *):( *).+( *))|("+varTextREGEX+r")))*\}( *)"
 bracketsTextREGEX = r"( *)\(.*\)( *)"
 commentTextREGEX = r'( *)\#(.*)( *)'
 functionTextREGEX = r"( *)(([a-zA-Z_])([a-zA-Z0-9_]*))\(.*\)( *)"
@@ -320,8 +354,7 @@ cobinedevalcompiled = re.compile(fr"{cobined}|{setVarREGEX}|{remTextREGEX}")
 evalcompiled = re.compile(r"( *)( *)")
 varTest = re.compile(varTextREGEX)
 
-
-def findclosestvarname(varname):
+def findclosestvarname(varname, vars):
     return find(varname, list(vars))
 
 # make a function that takes an input of a string that represents a string and convert all the \ commands to their actual character
@@ -334,7 +367,7 @@ def convert_backslash(string):
         string = string[1:-1]
     elif string[0] == '"':
         string = string[1:-1]
-    string = re.sub(r"\\([a-z\"\'])",
+    string = re.sub(r"\\([a-z\"\'\\])",
                     lambda x: eval(f"'\\{x.group(1)}'"), string)
     string = re.sub(r"\\u([a-fA-F0-9]{4})",
                     lambda x: chr(int(x.group(1), 16)), string)
@@ -379,6 +412,7 @@ processes = [
     "!@",
     ' not in ',
     ' is not in ',
+    ' isnt in ',
     "@",
     ' in ',
     ' is in ',
@@ -388,55 +422,53 @@ processes = [
     ">=",
     ' is bigger than or equal to ',
     ' is more than or equal to ',
-    "<-",
     '<',
     ' is less than ',
     ' is smaller than ',
-    ">-",
     '>',
     ' is bigger than ',
     ' is more than ',
     "!=",
     ' is not ',
+    ' is not equal to ',
+    ' isnt equal to ',
+    ' isnt ',
     '!==',
     "==",
+    ' equals ',
+    ' is equal to ',
     ' is ',
     '===',
-    "/",
-    ' divided by ',
-    ' over ',
-    "%",
-    ' modulo ',
-    ' mod ',
-    "$",
-    '//',
-    ' floor divistion ',
-    ' floor division of ',
-    ' div ',
-    '**',
-    "*",
-    ' multiplied by ',
-    ' times ',
-    ' x ',
-    "^",
-    ' to the power of ',
-    '√',
-    ' root ',
-    '!^',
-    '!**',
-    '+',
-    ' add ',
-    ' plus ',
-    "-",
+    ' minus ',
     ' subtract ',
-    ' minus '
+    '-',
+    ' plus ',
+    ' add ','+',
+    '!**',
+    '!^',
+    ' root ',
+    '√',
+    ' to the power of ',
+    '^',
+    '**',
+    '*',
+    ' x ',
+    ' times ',
+    ' multiplied by ',
+    ' div ',
+    ' floor division of ',
+    ' floor divistion ',
+    '//',                  '$',
+    ' mod ',               ' modulo ',
+    '%',                   ' over ',
+    ' divided by ',        '/'
 ]
 
 
 def math_exec(operator, value1, value2):
     if operator in ["+", ' add ', ' plus ']:
         if type(value1) == str or type(value2) == str:
-            return valToArgonString(value1, colour=False)+valToArgonString(value2, colour=False)
+            return valToArgonString(value1, colour=False, pretty=None)+valToArgonString(value2, colour=False, pretty=None)
         return value1+value2
     elif operator in ["-", ' subtract ', ' minus ']:
         output = value1-value2
@@ -460,10 +492,14 @@ def math_exec(operator, value1, value2):
         return output
     elif operator in ["//", '$', ' floor division ', ' floor division of ', ' div ']:
         return value1 // value2
-    elif operator in ["==", ' is ']:
+    elif operator in ["==", ' equals ', ' is equal to ']:
         return value1 == value2
-    elif operator in ["!=", ' is not ']:
+    elif operator in [' is ']:
+        return value1 is value2
+    elif operator in ["!=", ' isnt equal to ', ' is not equal to ']:
         return value1 != value2
+    elif operator in [' isnt ', ' is not ']:
+        return value1 is not value2
     elif operator == "===":
         if isinstance(value2, type(value1)):
             return value1 == value2
@@ -472,9 +508,9 @@ def math_exec(operator, value1, value2):
         if isinstance(value2, type(value1)):
             return value1 != value2
         return False
-    elif operator in [">", ">", ' is bigger than ', ' is more than ']:
+    elif operator in [">", ' is bigger than ', ' is more than ']:
         return value1 > value2
-    elif operator in ["<-", "<", ' is less than ', ' is smaller than ']:
+    elif operator in ["<", ' is less than ', ' is smaller than ']:
         return value1 < value2
     elif operator in [">=", ' is bigger than or equal to ', ' is more than or equal to ']:
         return value1 >= value2
@@ -482,7 +518,7 @@ def math_exec(operator, value1, value2):
         return value1 <= value2
     elif operator in ["@", ' in ', ' is in ']:
         return value1 in value2
-    elif operator in ["!@", ' not in ', 'is not in']:
+    elif operator in ["!@", ' not in ', ' is not in ', ' isnt in ']:
         return value1 not in value2
     elif operator in ["||", ' or ']:
         return value1 or value2
@@ -496,7 +532,7 @@ def runSub(subname, args):
     if len(vars[subname]['f']['prams']) != len(args):
         raise SyntaxError(
             f"{subname} requires {len(vars[subname]['f']['prams'])} arguments, but {len(args)} were given")
-    kwargs = vars
+    kwargs = copy.copy(builtins)
     for i in range(len(args)):
         if vars[subname]['f']['prams'][i] in kwargs and kwargs[vars[subname]['f']['prams'][i]]['type'] == 'init':
             raise RuntimeError(
@@ -590,7 +626,7 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]:
             else:
                 del vars[varname]
         else:
-            closest = findclosestvarname(varname)
+            closest = findclosestvarname(varname, vars)
             if closest == None:
                 raise Exception(f'Variable {varname} does not exist')
             else:
@@ -639,60 +675,12 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]:
                 else:
                     output = vars[var]["value"]
         else:
-            closest = findclosestvarname(var)
+            closest = findclosestvarname(var, vars)
             if closest == None:
                 raise Exception(f'Variable {var} does not exist')
             else:
                 raise Exception(
                     f'Variable {var} does not exist, did you mean \'{closest}\'?')
-    elif False:
-        process = []
-        switchlen = 0
-        switchval = None
-        breaks = False
-        for i in range(len(string)):
-            switchlen += 1
-            if string[i] == "?":
-                print(''.join(process))
-                try:
-                    switchval = Aexec("".join(process), True, vars=vars)[1]
-                    breaks = True
-                    break
-                except SyntaxError:
-                    pass
-            process.append(string[i])
-        
-        if not breaks:
-            raise Exception(f"invalid 'checker' value within switch statement")
-        if switchval:
-            process = []
-            for i in range(len(string[switchlen+1:])):
-                char = string[switchlen+1+i]
-                if char == ":":
-                    try:
-                        didprocess, output = Aexec(
-                            "".join(process), True, vars=vars)
-                        breaks = True
-                        break
-                    except SyntaxError:
-                        pass
-                process.append(char)
-            if not breaks:
-                raise Exception(f"invalid 'yes' value within switch statement")
-        else:
-            process = []
-            for i in range(len(string)):
-                char = string[len(string)-i-1]
-                if char == ":":
-                    try:
-                        didprocess, output = Aexec(
-                            "".join(process), True, vars=vars)
-                        break
-                    except SyntaxError:
-                        pass
-                process.insert(0, char)
-            if not breaks:
-                raise Exception(f"invalid 'no' value within switch statement")
     elif functionTest.fullmatch(string):
         function = string.strip().split("(")
         funcname = function[0]
@@ -722,7 +710,12 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]:
             else:
                 raise Exception(f"Variable {funcname} is not a function")
         else:
-            raise Exception(f"Function {funcname} does not exist")
+            closest = findclosestvarname(funcname, vars)
+            if closest == None:
+                raise Exception(f"Function {funcname} does not exist")
+            else:
+                raise Exception(
+                    f"Function {funcname} does not exist, did you mean \'{closest}\'?")
     elif varAdd1compiled.fullmatch(string):
         didprocess = True
         string = string.strip()
@@ -760,7 +753,7 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]:
                         iskey = False
                         key = None
                     except SyntaxError:
-                        pass
+                        process.append(char)
                 else:
                     process.append(char)
             else:
@@ -772,11 +765,35 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]:
                         iskey = True
                         process = []
                     except SyntaxError:
-                        pass
+                        process.append(char)
+                elif char == ",":
+                    try:
+                        key = "".join(process).strip()
+                        if key not in vars:
+                            closest = findclosestvarname(key, vars)
+                            if closest == None:
+                                raise Exception(
+                                    f'Variable {key} does not exist')
+                            else:
+                                raise Exception(
+                                    f'Variable {key} does not exist, did you mean \'{closest}\'?')
+                        value = Aexec("".join(process),
+                                      eval=True, vars=vars)[1]
+                        if key in output:
+                            raise Exception(f'Key \'{key}\' already exists')
+                        output[key] = value
+                        key = None
+                        process = []
+                    except SyntaxError:
+                        process.append(char)
                 else:
                     process.append(char)
-        if iskey:
+        if iskey and len(process) > 0:
             output[key] = Aexec("".join(process), True, vars=vars)[1]
+        elif len(process) > 0:
+            key = "".join(process).strip()
+            output[key] = Aexec(key, True, vars=vars)[1]
+
     elif itemscompiled.fullmatch(string):
         itemsText = string.strip()[1:-1]
         items = []
@@ -794,6 +811,53 @@ def val_Aexec(string, eval=False, vars=vars) -> Tuple[bool, Any]:
             items.append(Aexec("".join(process), True, vars=vars)[1])
         didprocess = True
         output = items
+    elif switchcompiled.fullmatch(string):
+        process = []
+        switchlen = 0
+        switchval = None
+        breaks = False
+        for i in range(len(string)):
+            switchlen += 1
+            if string[i] == "?":
+                try:
+                    switchval = Aexec("".join(process), True, vars=vars)[1]
+                    breaks = True
+                    break
+                except SyntaxError:
+                    pass
+            process.append(string[i])
+
+        if not breaks:
+            raise Exception(f"invalid 'checker' value within switch statement")
+        if switchval:
+            process = []
+            for i in range(len(string[switchlen+1:])):
+                char = string[switchlen+1+i]
+                if char == ":":
+                    try:
+                        didprocess, output = Aexec(
+                            "".join(process), True, vars=vars)
+                        breaks = True
+                        break
+                    except SyntaxError:
+                        pass
+                process.append(char)
+            if not breaks:
+                raise Exception(f"invalid 'yes' value within switch statement")
+        else:
+            process = []
+            for i in range(len(string)):
+                char = string[len(string)-i-1]
+                if char == ":":
+                    try:
+                        didprocess, output = Aexec(
+                            "".join(process), True, vars=vars)
+                        break
+                    except SyntaxError:
+                        pass
+                process.insert(0, char)
+            if not breaks:
+                raise Exception(f"invalid 'no' value within switch statement")
     else:
         raise SyntaxError(f"invalid syntax")
     return didprocess, output
@@ -837,10 +901,10 @@ def Aexec(string, eval=False, vars=vars) -> Tuple[bool, str]:
 
 
 runnerREGEX = re.compile(
-    r"( *)(while( +)\(.*\)|if( +)\(.*\)|(sub)( +)([a-zA-Z]+)\((.*)\)( +))( *)\[( *)")
+    fr"( *)(while( +)\(.*\)|if( +)\(.*\)|(sub)( +)({varOnly})\((.*)\)( +))( *)\[( *)")
 
 
-def run(code: list, vars=vars, isSub=False):
+def run(code: list, runvars=vars, isSub=False):
     Runnertype = ""
     Runnercheck = None
     inRunner = 0
@@ -875,13 +939,19 @@ def run(code: list, vars=vars, isSub=False):
                 inRunner -= 1
                 if inRunner == 0:
                     if Runnertype == "while":
-                        while Aexec(Runnercheck, True, vars=vars)[1]:
-                            run(Runnercode, vars)
+                        while Aexec(Runnercheck, True, vars=runvars)[1]:
+                            resp = run(Runnercode, runvars, isSub)
+                            if isSub and resp[0]:
+                                return resp
                     elif Runnertype == "if":
-                        if Aexec(Runnercheck, True, vars=vars)[1]:
-                            run(Runnercode, vars)
+                        if Aexec(Runnercheck, True, vars=runvars)[1]:
+                            resp = run(Runnercode, runvars, isSub)
+                            if isSub and resp[0]:
+                                return resp
                         else:
-                            run(Elsecode, vars)
+                            resp = run(Runnercode, runvars, isSub)
+                            if isSub and resp[0]:
+                                return resp
                     elif Runnertype == "sub":
                         vars[subname] = {"type": "const", 'f': {
                             'prams': prams, 'code': Runnercode}}
@@ -905,9 +975,17 @@ def run(code: list, vars=vars, isSub=False):
                 else:
                     Runnercode.append(line)
         elif line != "":
-            if isSub and line.strip().startswith('return'):
-                return Aexec(line.strip()[6:], vars=vars, eval=True)
-            Aexec(line, vars=vars)
+            if isSub:
+
+                if line.strip().startswith('return'):
+                    return Aexec(line.strip()[6:], vars=runvars, eval=True)
+                elif line.strip().startswith('global'):
+                    runvars[line.strip()[6:].strip()
+                            ] = vars[line.strip()[6:].strip()]
+                else:
+                    Aexec(line, vars=runvars)
+            else:
+                Aexec(line, vars=runvars)
     return False, None
 
 
@@ -922,12 +1000,28 @@ if __name__ == "__main__":
     else:
         print(boxify(
             version+'\nMIT LICENCE AGREEMENT\n(https://github.com/Ugric/Argon)',  align='center'))
+        exitAtempt = 0
         while True:
             try:
                 code = input(">>> ")
+                exitAtempt = 0
                 if code != "":
                     output = (Aexec(code))
                     if output[0]:
                         log(output[1])
-            except Exception as e:
+            except KeyboardInterrupt as e:
+                if exitAtempt == 0:
+                    exitAtempt += 1
+                    print('\n(To exit, press Ctrl+C again or Ctrl+D)')
+                else:
+                    break
+            except EOFError as e:
+                break
+            except SyntaxError as e:
+                exitAtempt = 0
                 print(e)
+                continue
+            except Exception as e:
+                exitAtempt = 0
+                print(e)
+                continue
